@@ -74,10 +74,8 @@ public class FilmController {
                         throw new ResponseStatusException(HttpStatus.OK);
                     }
                 }
-                newFilm.setId(++newId);
-            } else {
-                newFilm.setId(++newId);
             }
+            newFilm.setId(++newId);
             films.add(newFilm);
             log.info("Добавлен новый фильм \"" + newFilm.getName() + "\".");
             return newFilm;

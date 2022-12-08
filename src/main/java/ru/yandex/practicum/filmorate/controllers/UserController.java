@@ -75,10 +75,8 @@ public class UserController {
                         throw new ResponseStatusException(HttpStatus.OK);
                     }
                 }
-                newUser.setId(++newId);
-            } else {
-                newUser.setId(++newId);
             }
+            newUser.setId(++newId);
             users.add(newUser);
             log.info("Добавлен новый пользователь с E-mail " + newUser.getEmail());
             return newUser;
