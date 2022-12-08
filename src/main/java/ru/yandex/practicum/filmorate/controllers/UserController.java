@@ -17,32 +17,33 @@ import java.util.List;
 @Slf4j
 public class UserController {
     private final List<User> users = new ArrayList<>();
-    private final UserHandler userHandler = new UserHandler();
+    private final Handler handler = new Handler();
+    private int newId = 0;
 
     @GetMapping
-    public List<User> getUsers() {
-        userHandler.logRequestMethod(RequestMethod.GET);
+    public List<User> get() {
+        handler.logRequestMethod(RequestMethod.GET);
         return users;
     }
 
     @PostMapping
-    public User createUser(@Valid @RequestBody User user) {
-        return userHandler.handleRequest(user, RequestMethod.POST);
+    public User post(@Valid @RequestBody User user) {
+        return handler.handleRequest(user, RequestMethod.POST);
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
-        return userHandler.handleRequest(user, RequestMethod.PUT);
+    public User put(@Valid @RequestBody User user) {
+        return handler.handleRequest(user, RequestMethod.PUT);
     }
 
-    private class UserHandler {
+    private class Handler {
         private final UserValidator userValidator = new UserValidator();
 
         private User handleRequest(User user, RequestMethod requestMethod) {
             logRequestMethod(requestMethod);
             try {
-                userValidator.validateUser(user);
-                return handleUser(user, requestMethod);
+                userValidator.validate(user);
+                return handle(user, requestMethod);
             } catch (ValidationException e) {
                 log.warn(e.getMessage(), e);
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -53,20 +54,20 @@ public class UserController {
             log.debug("Получен запрос " + requestMethod + "/users.");
         }
 
-        private User handleUser(User newUser, RequestMethod requestMethod) throws IllegalArgumentException {
+        private User handle(User user, RequestMethod requestMethod) throws IllegalArgumentException {
             switch (requestMethod) {
                 case POST:
-                    return postUser(newUser);
+                    return post(user);
                 case PUT:
-                    validateId(newUser);
-                    return putUser(newUser);
+                    validateId(user);
+                    return put(user);
                 default:
                     throw new IllegalArgumentException("Запрашиваемый метод не поддерживается.\n" +
                             "Для добавления или изменения пользователя выберите POST- или PUT-запрос.");
             }
         }
 
-        private User postUser(User newUser) {
+        private User post(User newUser) {
             if (!users.isEmpty()) {
                 for (User user : users) {
                     if (user.getEmail().equals(newUser.getEmail())) {
@@ -74,16 +75,16 @@ public class UserController {
                         throw new ResponseStatusException(HttpStatus.OK);
                     }
                 }
-                newUser.setId(users.size() + 1);
+                newUser.setId(++newId);
             } else {
-                newUser.setId(1);
+                newUser.setId(++newId);
             }
             users.add(newUser);
             log.info("Добавлен новый пользователь с E-mail " + newUser.getEmail());
             return newUser;
         }
 
-        private User putUser(User newUser) {
+        private User put(User newUser) {
             if (!users.isEmpty()) {
                 for (int i = 0; i < users.size(); i++) {
                     User user = users.get(i);

@@ -24,7 +24,7 @@ class FilmValidatorTest {
     void shouldNotValidateIfFilmIsNull() {
         film = null;
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Данные фильма не указаны.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -38,7 +38,7 @@ class FilmValidatorTest {
                 LocalDate.of(1984, 10, 26),
                 108);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Название фильма не указано.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -52,7 +52,7 @@ class FilmValidatorTest {
                 LocalDate.of(1984, 10, 26),
                 108);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Название фильма не указано.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -65,7 +65,7 @@ class FilmValidatorTest {
                 LocalDate.of(1984, 10, 26),
                 108);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Описание фильма не указано.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -78,7 +78,7 @@ class FilmValidatorTest {
                 LocalDate.of(1984, 10, 26),
                 108);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Описание фильма не указано.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -95,7 +95,7 @@ class FilmValidatorTest {
                 LocalDate.of(1984, 10, 26),
                 108);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Описание фильма не может превышать 200 символов.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -110,7 +110,7 @@ class FilmValidatorTest {
                 LocalDate.of(1984, 10, 26),
                 108);
         assertEquals(200, film.getDescription().length());
-        assertDoesNotThrow(() -> filmValidator.validateFilm(film));
+        assertDoesNotThrow(() -> filmValidator.validate(film));
     }
 
     @Test
@@ -122,7 +122,7 @@ class FilmValidatorTest {
                 null,
                 108);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Дата релиза не указана.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -136,7 +136,7 @@ class FilmValidatorTest {
                 LocalDate.of(1895, 12, 27),
                 108);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Дата релиза не может быть раньше 28 декабря 1895 года.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -149,7 +149,7 @@ class FilmValidatorTest {
                         "пост-апокалиптического будущего.",
                 LocalDate.of(1895, 12, 28),
                 108);
-        assertDoesNotThrow(() -> filmValidator.validateFilm(film));
+        assertDoesNotThrow(() -> filmValidator.validate(film));
     }
 
     @Test
@@ -161,7 +161,7 @@ class FilmValidatorTest {
                 LocalDate.of(1984, 10, 26),
                 null);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Продолжительность фильма не указана.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -175,7 +175,7 @@ class FilmValidatorTest {
                 LocalDate.of(1984, 10, 26),
                 0);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Продолжительность фильма не может быть меньше или равна 0.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -189,7 +189,7 @@ class FilmValidatorTest {
                 LocalDate.of(1984, 10, 26),
                 -100);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> filmValidator.validateFilm(film));
+                () -> filmValidator.validate(film));
         assertEquals("Продолжительность фильма не может быть меньше или равна 0.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }

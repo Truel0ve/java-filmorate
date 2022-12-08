@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.utilities.ValidationException;
 import java.time.LocalDate;
 
 public class FilmValidator {
-    public void validateFilm(Film film) throws ValidationException {
+    public void validate(Film film) throws ValidationException {
         validateNotNull(film);
         validateName(film);
         validateDescription(film);

@@ -25,53 +25,53 @@ class FilmControllerTest {
 
     @Test
     void shouldCreateNewFilm() {
-        assertEquals(film, filmController.createFilm(film), "Новый фильм не добавлен.");
+        assertEquals(film, filmController.post(film), "Новый фильм не добавлен.");
     }
 
     @Test
     void shouldNotCreateThenNewFilmHasSameName() {
-        filmController.createFilm(film);
+        filmController.post(film);
         Film newFilm = new Film(
                 "Терминатор",
                 "Фильм со Шварценеггером в главной роли.",
                 LocalDate.of(1984, 10, 26),
                 108);
-        assertThrows(ResponseStatusException.class, () -> filmController.createFilm(newFilm));
+        assertThrows(ResponseStatusException.class, () -> filmController.post(newFilm));
     }
 
     @Test
     void shouldUpdateFilm() {
-        filmController.createFilm(film);
+        filmController.post(film);
         Film newFilm = new Film(
                 "Терминатор",
                 "Фильм со Шварценеггером в главной роли.",
                 LocalDate.of(1984, 10, 26),
                 108);
         newFilm.setId(film.getId());
-        assertEquals(newFilm, filmController.updateFilm(newFilm),
+        assertEquals(newFilm, filmController.put(newFilm),
                 "Данные фильма не обновлены.");
     }
 
     @Test
     void shouldNotUpdateThenFilmHasWrongId() {
-        filmController.createFilm(film);
+        filmController.post(film);
         Film newFilm = new Film(
                 "Терминатор",
                 "Фильм со Шварценеггером в главной роли.",
                 LocalDate.of(1984, 10, 26),
                 108);
         newFilm.setId(null);
-        assertThrows(ResponseStatusException.class, () -> filmController.updateFilm(newFilm));
+        assertThrows(ResponseStatusException.class, () -> filmController.put(newFilm));
         newFilm.setId(2);
-        assertThrows(ResponseStatusException.class, () -> filmController.updateFilm(newFilm));
+        assertThrows(ResponseStatusException.class, () -> filmController.put(newFilm));
     }
 
     @Test
     void shouldReturnFilms() {
-        assertEquals(0, filmController.getFilms().size(),
+        assertEquals(0, filmController.get().size(),
                 "Список содержит фильм(ы).");
-        filmController.createFilm(film);
-        assertEquals(1, filmController.getFilms().size(),
+        filmController.post(film);
+        assertEquals(1, filmController.get().size(),
                 "Неверное количество фильмов в списке.");
     }
 }

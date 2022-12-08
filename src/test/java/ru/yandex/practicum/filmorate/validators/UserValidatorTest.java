@@ -22,7 +22,7 @@ class UserValidatorTest {
     void shouldNotValidateIfUserIsNull() {
         user = null;
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> userValidator.validateUser(user));
+                () -> userValidator.validate(user));
         assertEquals("Данные пользователя не указаны.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -35,7 +35,7 @@ class UserValidatorTest {
                 "Pavel",
                 LocalDate.of(1990, 12, 8));
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> userValidator.validateUser(user));
+                () -> userValidator.validate(user));
         assertEquals("E-mail не указан.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -48,7 +48,7 @@ class UserValidatorTest {
                 "Pavel",
                 LocalDate.of(1990, 12, 8));
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> userValidator.validateUser(user));
+                () -> userValidator.validate(user));
         assertEquals("E-mail не указан.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -61,7 +61,7 @@ class UserValidatorTest {
                 "Pavel",
                 LocalDate.of(1990, 12, 8));
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> userValidator.validateUser(user));
+                () -> userValidator.validate(user));
         assertEquals("Неверно указан E-mail.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -74,7 +74,7 @@ class UserValidatorTest {
                 "Pavel",
                 LocalDate.of(1990, 12, 8));
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> userValidator.validateUser(user));
+                () -> userValidator.validate(user));
         assertEquals("Логин не указан.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -87,7 +87,7 @@ class UserValidatorTest {
                 "Pavel",
                 LocalDate.of(1990, 12, 8));
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> userValidator.validateUser(user));
+                () -> userValidator.validate(user));
         assertEquals("Логин не указан.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -100,7 +100,7 @@ class UserValidatorTest {
                 "Pavel",
                 LocalDate.of(1990, 12, 8));
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> userValidator.validateUser(user));
+                () -> userValidator.validate(user));
         assertEquals("Некорректный логин.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -112,7 +112,7 @@ class UserValidatorTest {
                 "Truelove",
                 null,
                 LocalDate.of(1990, 12, 8));
-        assertDoesNotThrow(() -> userValidator.validateUser(user));
+        assertDoesNotThrow(() -> userValidator.validate(user));
         assertEquals(user.getLogin(), user.getName(), "Имя пользователя и логин не совпадают");
     }
 
@@ -123,7 +123,7 @@ class UserValidatorTest {
                 "Truelove",
                 " ",
                 LocalDate.of(1990, 12, 8));
-        assertDoesNotThrow(() -> userValidator.validateUser(user));
+        assertDoesNotThrow(() -> userValidator.validate(user));
         assertEquals(user.getLogin(), user.getName(), "Имя пользователя и логин не совпадают");
     }
 
@@ -135,7 +135,7 @@ class UserValidatorTest {
                 "Pavel",
                 null);
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> userValidator.validateUser(user));
+                () -> userValidator.validate(user));
         assertEquals("Дата рождения не указана.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }
@@ -148,7 +148,7 @@ class UserValidatorTest {
                 "Pavel",
                 LocalDate.of(2023, 12, 8));
         ValidationException exception = assertThrows(ValidationException.class,
-                () -> userValidator.validateUser(user));
+                () -> userValidator.validate(user));
         assertEquals("Неверно указана дата рождения.",
                 exception.getMessage(), "Неверный текст ошибки.");
     }

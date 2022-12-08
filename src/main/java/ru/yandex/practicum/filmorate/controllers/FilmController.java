@@ -17,31 +17,32 @@ import java.util.List;
 @Slf4j
 public class FilmController {
     private final List<Film> films = new ArrayList<>();
-    private final FilmHandler filmHandler = new FilmHandler();
+    private final Handler handler = new Handler();
+    private int newId = 0;
 
     @GetMapping
-    public List<Film> getFilms() {
-        filmHandler.logRequestMethod(RequestMethod.GET);
+    public List<Film> get() {
+        handler.logRequestMethod(RequestMethod.GET);
         return films;
     }
 
     @PostMapping
-    public Film createFilm(@Valid @RequestBody Film film) {
-        return filmHandler.handleRequest(film, RequestMethod.POST);
+    public Film post(@Valid @RequestBody Film film) {
+        return handler.handleRequest(film, RequestMethod.POST);
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) {
-        return filmHandler.handleRequest(film, RequestMethod.PUT);
+    public Film put(@Valid @RequestBody Film film) {
+        return handler.handleRequest(film, RequestMethod.PUT);
     }
 
-    private class FilmHandler {
+    private class Handler {
         private final FilmValidator filmValidator = new FilmValidator();
         private Film handleRequest(Film film, RequestMethod requestMethod) {
             logRequestMethod(requestMethod);
             try {
-                filmValidator.validateFilm(film);
-                return handleFilm(film, requestMethod);
+                filmValidator.validate(film);
+                return handle(film, requestMethod);
             } catch (IllegalArgumentException | ValidationException e) {
                 log.warn(e.getMessage(), e);
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -52,20 +53,20 @@ public class FilmController {
             log.debug("Получен запрос " + requestMethod + "/films.");
         }
 
-        private Film handleFilm(Film newFilm, RequestMethod requestMethod) throws IllegalArgumentException {
+        private Film handle(Film film, RequestMethod requestMethod) throws IllegalArgumentException {
             switch (requestMethod) {
                 case POST:
-                    return postFilm(newFilm);
+                    return post(film);
                 case PUT:
-                    validateId(newFilm);
-                    return putFilm(newFilm);
+                    validateId(film);
+                    return put(film);
                 default:
                     throw new IllegalArgumentException("Запрашиваемый метод не поддерживается.\n" +
                             "Для добавления или изменения фильма выберите POST- или PUT-запрос.");
             }
         }
 
-        private Film postFilm(Film newFilm) {
+        private Film post(Film newFilm) {
             if (!films.isEmpty()) {
                 for (Film film : films) {
                     if (film.getName().equals(newFilm.getName())) {
@@ -73,16 +74,16 @@ public class FilmController {
                         throw new ResponseStatusException(HttpStatus.OK);
                     }
                 }
-                newFilm.setId(films.size() + 1);
+                newFilm.setId(++newId);
             } else {
-                newFilm.setId(1);
+                newFilm.setId(++newId);
             }
             films.add(newFilm);
             log.info("Добавлен новый фильм \"" + newFilm.getName() + "\".");
             return newFilm;
         }
 
-        private Film putFilm(Film newFilm) {
+        private Film put(Film newFilm) {
             if (!films.isEmpty()) {
                 for (int i = 0; i < films.size(); i++) {
                     Film film = films.get(i);

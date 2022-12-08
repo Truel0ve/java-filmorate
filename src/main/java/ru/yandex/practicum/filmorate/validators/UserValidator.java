@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.utilities.ValidationException;
 import java.time.LocalDate;
 
 public class UserValidator {
-    public void validateUser(User user) throws ValidationException {
+    public void validate(User user) throws ValidationException {
         validateNotNull(user);
         validateEmail(user);
         validateLogin(user);
