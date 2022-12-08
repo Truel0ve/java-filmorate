@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.utilities.ValidationException;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
@@ -15,7 +17,6 @@ import java.util.List;
 @Slf4j
 public class FilmController {
     private final List<Film> films = new ArrayList<>();
-    private int newId = 0;
     private final FilmHandler filmHandler = new FilmHandler();
 
     @GetMapping
@@ -41,9 +42,9 @@ public class FilmController {
             try {
                 filmValidator.validateFilm(film);
                 return handleFilm(film, requestMethod);
-            } catch (ValidationException e) {
+            } catch (IllegalArgumentException | ValidationException e) {
                 log.warn(e.getMessage(), e);
-                return null;
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             }
         }
 
@@ -51,28 +52,56 @@ public class FilmController {
             log.debug("Получен запрос " + requestMethod + "/films.");
         }
 
-        private Film handleFilm(Film newFilm, RequestMethod requestMethod) {
+        private Film handleFilm(Film newFilm, RequestMethod requestMethod) throws IllegalArgumentException {
+            switch (requestMethod) {
+                case POST:
+                    return postFilm(newFilm);
+                case PUT:
+                    validateId(newFilm);
+                    return putFilm(newFilm);
+                default:
+                    throw new IllegalArgumentException("Запрашиваемый метод не поддерживается.\n" +
+                            "Для добавления или изменения фильма выберите POST- или PUT-запрос.");
+            }
+        }
+
+        private Film postFilm(Film newFilm) {
             if (!films.isEmpty()) {
-                for (int i = 0; i < films.size(); i++) {
-                    Film film = films.get(i);
+                for (Film film : films) {
                     if (film.getName().equals(newFilm.getName())) {
-                        switch (requestMethod) {
-                            case POST:
-                                log.info("Фильм \"" + film.getName() + "\" уже есть в базе.");
-                                return film;
-                            case PUT:
-                                newFilm.setId(++newId);
-                                films.set(i, newFilm);
-                                log.info("Внесены изменения в данные фильма \"" + newFilm.getName() + "\".");
-                                return newFilm;
-                        }
+                        log.info("Фильм \"" + film.getName() + "\" уже есть в базе.");
+                        throw new ResponseStatusException(HttpStatus.OK);
                     }
                 }
+                newFilm.setId(films.size() + 1);
+            } else {
+                newFilm.setId(1);
             }
-            newFilm.setId(++newId);
             films.add(newFilm);
             log.info("Добавлен новый фильм \"" + newFilm.getName() + "\".");
             return newFilm;
+        }
+
+        private Film putFilm(Film newFilm) {
+            if (!films.isEmpty()) {
+                for (int i = 0; i < films.size(); i++) {
+                    Film film = films.get(i);
+                    if (film.getId().equals(newFilm.getId())) {
+                        films.set(i, newFilm);
+                        log.info("Внесены изменения в данные фильма с ID=" + newFilm.getId() + "\".");
+                        return newFilm;
+                    }
+                }
+            }
+            log.info("Фильма с указанным ID=" + newFilm.getId() + " нет в базе.");
+            throw new ResponseStatusException(HttpStatus.OK);
+        }
+
+        private void validateId(Film newFilm) {
+            if (newFilm.getId() == null || newFilm.getId() > films.size()) {
+                log.warn("ID фильма не задан или отсутствует в базе.");
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
     }
 }

@@ -38,7 +38,7 @@ public class UserValidator {
         }
     }
 
-    private void validateName(User user){
+    private void validateName(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }

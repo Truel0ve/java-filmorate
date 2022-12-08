@@ -48,7 +48,7 @@ public class FilmValidator {
         if (film.getDuration() == null) {
             throw new ValidationException("Продолжительность фильма не указана.");
         }
-        if (film.getDuration().isNegative() || film.getDuration().isZero()) {
+        if (film.getDuration() <= 0) {
             throw new ValidationException("Продолжительность фильма не может быть меньше или равна 0.");
         }
     }

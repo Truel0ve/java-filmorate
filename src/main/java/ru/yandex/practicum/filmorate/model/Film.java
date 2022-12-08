@@ -4,12 +4,11 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.time.Duration;
 import java.time.LocalDate;
 
 @Data
 public class Film {
-    private int id;
+    private Integer id;
     @NotBlank
     private String name;
     @NotBlank
@@ -17,9 +16,9 @@ public class Film {
     @NotNull
     private LocalDate releaseDate;
     @NotNull
-    private Duration duration;
+    private Integer duration;
 
-    public Film(String name, String description, LocalDate releaseDate, Duration duration) {
+    public Film(String name, String description, LocalDate releaseDate, Integer duration) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -23,36 +24,45 @@ class UserControllerTest {
 
     @Test
     void shouldCreateNewUser() {
-        assertEquals(userController.createUser(user), user, "Новый пользователь не добавлен.");
+        assertEquals(user, userController.createUser(user), "Новый пользователь не добавлен.");
+    }
+
+    @Test
+    void shouldNotCreateThenNewUserHasSameEmail() {
+        userController.createUser(user);
         User newUser = new User(
                 "truelove@yandex.ru",
                 "Truelove",
                 "Vladimir",
                 LocalDate.of(1990, 12, 8));
-        assertNotEquals(newUser, userController.createUser(newUser),
-                "Новый пользователь добавлен.");
+        assertThrows(ResponseStatusException.class, () -> userController.createUser(newUser));
     }
 
     @Test
     void shouldUpdateUser() {
-        userController.updateUser(user);
+        userController.createUser(user);
         User newUser = new User(
                 "truelove@yandex.ru",
                 "Truelove",
                 "Vladimir",
                 LocalDate.of(1990, 12, 8));
+        newUser.setId(user.getId());
         assertEquals(newUser, userController.updateUser(newUser),
                 "Данные пользователя не обновлены.");
     }
 
     @Test
-    void shouldReturnNullThenUserHasWrongValue() {
+    void shouldNotUpdateThenUserHasWrongId() {
+        userController.createUser(user);
         User newUser = new User(
                 "truelove@yandex.ru",
-                " ",
+                "Truelove",
                 "Vladimir",
                 LocalDate.of(1990, 12, 8));
-        assertNull(userController.createUser(newUser), "Новый пользователь добавлен.");
+        newUser.setId(null);
+        assertThrows(ResponseStatusException.class, () -> userController.updateUser(newUser));
+        newUser.setId(2);
+        assertThrows(ResponseStatusException.class, () -> userController.updateUser(newUser));
     }
 
     @Test
