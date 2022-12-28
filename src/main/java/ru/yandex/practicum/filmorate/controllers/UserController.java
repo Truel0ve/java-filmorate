@@ -1,107 +1,85 @@
 package ru.yandex.practicum.filmorate.controllers;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.utilities.ValidationException;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final List<User> users = new ArrayList<>();
-    private final Handler handler = new Handler();
-    private int newId = 0;
+    private final UserService userService;
 
     @GetMapping
-    public List<User> get() {
-        handler.logRequestMethod(RequestMethod.GET);
-        return users;
+    public List<User> getAllUsers() {
+        logRequestMethod(RequestMethod.GET);
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable("id") Integer userId) {
+        String path = "/" + userId;
+        logRequestMethod(RequestMethod.GET, path);
+        return userService.getUserById(Long.valueOf(userId));
     }
 
     @PostMapping
     public User post(@Valid @RequestBody User user) {
-        return handler.handleRequest(user, RequestMethod.POST);
+        logRequestMethod(RequestMethod.POST);
+        return userService.createUser(user);
     }
 
     @PutMapping
     public User put(@Valid @RequestBody User user) {
-        return handler.handleRequest(user, RequestMethod.PUT);
+        logRequestMethod(RequestMethod.PUT);
+        return userService.updateUser(user);
     }
 
-    private class Handler {
-        private final UserValidator userValidator = new UserValidator();
+    @DeleteMapping
+    public void delete(@Valid @RequestBody User user) {
+        logRequestMethod(RequestMethod.DELETE);
+        userService.deleteUser(user);
+    }
 
-        private User handleRequest(User user, RequestMethod requestMethod) {
-            logRequestMethod(requestMethod);
-            try {
-                userValidator.validate(user);
-                return handle(user, requestMethod);
-            } catch (ValidationException e) {
-                log.warn(e.getMessage(), e);
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-            }
-        }
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable("id") Long userId, @PathVariable Long friendId) {
+        String path = "/" + userId + "/friends/" + friendId;
+        logRequestMethod(RequestMethod.PUT, path);
+        userService.addFriend(userId, friendId);
+    }
 
-        private void logRequestMethod(RequestMethod requestMethod) {
-            log.debug("Получен запрос " + requestMethod + "/users.");
-        }
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable("id") Long userId, @PathVariable Long friendId) {
+        String path = "/" + userId + "/friends/" + friendId;
+        logRequestMethod(RequestMethod.DELETE, path);
+        userService.deleteFriend(userId, friendId);
+    }
 
-        private User handle(User user, RequestMethod requestMethod) throws IllegalArgumentException {
-            switch (requestMethod) {
-                case POST:
-                    return post(user);
-                case PUT:
-                    validateId(user);
-                    return put(user);
-                default:
-                    throw new IllegalArgumentException("Запрашиваемый метод не поддерживается.\n" +
-                            "Для добавления или изменения пользователя выберите POST- или PUT-запрос.");
-            }
-        }
+    @GetMapping("/{id}/friends")
+    public List<User> getFriendList(@PathVariable("id") Long userId) {
+        String path = "/" + userId + "/friends";
+        logRequestMethod(RequestMethod.GET, path);
+        return userService.getFriendList(userId);
+    }
 
-        private User post(User newUser) {
-            if (!users.isEmpty()) {
-                for (User user : users) {
-                    if (user.getEmail().equals(newUser.getEmail())) {
-                        log.info("Пользователь с E-mail " + newUser.getEmail() + " уже есть в базе.");
-                        throw new ResponseStatusException(HttpStatus.OK);
-                    }
-                }
-            }
-            newUser.setId(++newId);
-            users.add(newUser);
-            log.info("Добавлен новый пользователь с E-mail " + newUser.getEmail());
-            return newUser;
-        }
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getMutualFriendList(@PathVariable("id") Long userId, @PathVariable Long otherId) {
+        String path = "/" + userId + "/friends/common/" + otherId;
+        logRequestMethod(RequestMethod.GET, path);
+        return userService.getMutualFriendList(userId, otherId);
+    }
 
-        private User put(User newUser) {
-            if (!users.isEmpty()) {
-                for (int i = 0; i < users.size(); i++) {
-                    User user = users.get(i);
-                    if (user.getId().equals(newUser.getId())) {
-                        users.set(i, newUser);
-                        log.info("Внесены изменения в данные пользователя с ID=" + newUser.getId());
-                        return newUser;
-                    }
-                }
-            }
-            log.info("Пользователя с указанным ID=" + newUser.getId() + " нет в базе.");
-            throw new ResponseStatusException(HttpStatus.OK);
-        }
+    private void logRequestMethod(RequestMethod requestMethod) {
+        log.debug("Получен запрос " + requestMethod + " по адресу: /users");
+    }
 
-        private void validateId(User newUser) {
-            if (newUser.getId() == null || newUser.getId() > users.size()) {
-                log.warn("ID пользователя не задан или отсутствует в базе.");
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
+    private void logRequestMethod(RequestMethod requestMethod, String path) {
+        log.debug("Получен запрос " + requestMethod + " по адресу: /users" + path);
     }
 }

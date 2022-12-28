@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.validators;
 
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.utilities.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
+@Service
 public class UserValidator {
     public void validate(User user) throws ValidationException {
         validateNotNull(user);
@@ -25,7 +28,7 @@ public class UserValidator {
             throw new ValidationException("E-mail не указан.");
         }
         if (!user.getEmail().contains("@")) {
-            throw new ValidationException("Неверно указан E-mail.");
+            throw new ValidationException("Неверно указан E-mail: " + user.getEmail());
         }
     }
 
@@ -34,7 +37,7 @@ public class UserValidator {
             throw new ValidationException("Логин не указан.");
         }
         if (user.getLogin().contains(" ")) {
-            throw new ValidationException("Некорректный логин.");
+            throw new ValidationException("Некорректный логин: " + user.getLogin());
         }
     }
 
@@ -49,7 +52,8 @@ public class UserValidator {
             throw new ValidationException("Дата рождения не указана.");
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Неверно указана дата рождения.");
+            throw new ValidationException("Неверно указана дата рождения: " +
+                    user.getBirthday().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
         }
     }
 }

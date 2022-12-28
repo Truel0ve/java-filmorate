@@ -1,15 +1,18 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.util.Set;
 
-@Data
+@Getter
+@Setter
 public class User {
-    private Integer id;
+    private Long id;
     @Pattern(regexp = "^\\w+@\\w+\\.\\w+$")
     private String email;
     @NotBlank
@@ -17,6 +20,7 @@ public class User {
     private String name;
     @NotNull
     private LocalDate birthday;
+    private Set<Long> friends;
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
