@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.validators;
 
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import java.time.LocalDate;
 
+@Service
 public class FilmValidator {
     public void validate(Film film) throws ValidationException {
         validateNotNull(film);

@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,7 +63,7 @@ class UserValidatorTest {
                 LocalDate.of(1990, 12, 8));
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
-        assertEquals("Неверно указан E-mail.",
+        assertEquals("Неверно указан E-mail: " + user.getEmail(),
                 exception.getMessage(), "Неверный текст ошибки.");
     }
 
@@ -101,7 +102,7 @@ class UserValidatorTest {
                 LocalDate.of(1990, 12, 8));
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
-        assertEquals("Некорректный логин.",
+        assertEquals("Некорректный логин: " + user.getLogin(),
                 exception.getMessage(), "Неверный текст ошибки.");
     }
 
@@ -149,7 +150,8 @@ class UserValidatorTest {
                 LocalDate.of(2023, 12, 8));
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
-        assertEquals("Неверно указана дата рождения.",
+        assertEquals("Неверно указана дата рождения: " + user.getBirthday().
+                        format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                 exception.getMessage(), "Неверный текст ошибки.");
     }
 }

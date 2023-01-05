@@ -13,24 +13,16 @@ import java.util.Map;
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int newId = 0;
-
-    @Override
-    public Map<Integer, Film> getAll() {
-        return films;
-    }
+    private final Map<Long, Film> films = new HashMap<>();
+    private Long newId = 0L;
 
     @Override
-    public Film create(Film film) {
-        if (!films.isEmpty()) {
-            for (Film someFilm : films.values()) {
-                if (someFilm.getName().equals(film.getName())) {
-                    log.info("Фильм \"" + film.getName() + "\" уже есть в базе.");
-                    throw new ResponseStatusException(HttpStatus.OK);
-                }
-            }
+    public Film createFilm(Film film) {
+        if (!films.isEmpty() && films.values()
+                .stream()
+                .anyMatch(someFilm -> someFilm.getName().equals(film.getName()))) {
+            log.info("Фильм \"" + film.getName() + "\" уже есть в базе.");
+            throw new ResponseStatusException(HttpStatus.OK);
         }
         film.setId(++newId);
         films.put(film.getId(), film);
@@ -39,24 +31,37 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film update(Film film) {
-        validateId(film);
-        films.replace(film.getId(), film);
+    public Film updateFilm(Film film) {
+        Long filmId = film.getId();
+        films.replace(filmId, film);
         log.info("Внесены изменения в данные фильма \"" + film.getName() + "\".");
         return film;
     }
 
     @Override
-    public void delete(Film film) {
-        validateId(film);
-        films.remove(film.getId());
+    public void deleteFilm(Film film) {
+        Long filmId = film.getId();
+        films.remove(filmId);
         log.info("Фильм \"" + film.getName() + "\" удален из базы.");
     }
 
-    private void validateId(Film film) {
-        if (film.getId() == null || !films.containsKey(film.getId())) {
-            log.warn("ID фильма не задан или отсутствует в базе.");
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public Map<Long, Film> getAllFilms() {
+        return films;
+    }
+
+    public Film getFilmById(Long filmId) {
+        return films.get(filmId);
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+        films.get(filmId).getLikes().add(userId);
+        log.info("Пользователь с ID=" + userId + " поставил лайк фильму \"" + films.get(filmId).getName() + "\".");
+    }
+
+    @Override
+    public void deleteLike(Long filmId, Long userId) {
+        films.get(filmId).getLikes().remove(userId);
+        log.info("Пользователь с ID=" + userId + " убрал лайк фильму \"" + films.get(filmId).getName() + "\".");
     }
 }

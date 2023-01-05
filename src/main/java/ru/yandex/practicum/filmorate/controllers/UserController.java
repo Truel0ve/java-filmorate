@@ -23,56 +23,51 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable("id") Integer userId) {
-        String path = "/" + userId;
-        logRequestMethod(RequestMethod.GET, path);
-        return userService.getUserById(Long.valueOf(userId));
+    public User getUserById(@PathVariable("id") Long userId) {
+        logRequestMethod(RequestMethod.GET, "/" + userId);
+        return userService.getUserById(userId);
     }
 
     @PostMapping
-    public User post(@Valid @RequestBody User user) {
+    public User postUser(@Valid @RequestBody User user) {
         logRequestMethod(RequestMethod.POST);
         return userService.createUser(user);
     }
 
     @PutMapping
-    public User put(@Valid @RequestBody User user) {
+    public User putUser(@Valid @RequestBody User user) {
         logRequestMethod(RequestMethod.PUT);
         return userService.updateUser(user);
     }
 
     @DeleteMapping
-    public void delete(@Valid @RequestBody User user) {
+    public void deleteUser(@Valid @RequestBody User user) {
         logRequestMethod(RequestMethod.DELETE);
         userService.deleteUser(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable("id") Long userId, @PathVariable Long friendId) {
-        String path = "/" + userId + "/friends/" + friendId;
-        logRequestMethod(RequestMethod.PUT, path);
+        logRequestMethod(RequestMethod.PUT, "/" + userId + "/friends/" + friendId);
         userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable("id") Long userId, @PathVariable Long friendId) {
-        String path = "/" + userId + "/friends/" + friendId;
-        logRequestMethod(RequestMethod.DELETE, path);
+        logRequestMethod(RequestMethod.DELETE, "/" + userId + "/friends/" + friendId);
         userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("/{id}/friends")
     public List<User> getFriendList(@PathVariable("id") Long userId) {
-        String path = "/" + userId + "/friends";
-        logRequestMethod(RequestMethod.GET, path);
+        logRequestMethod(RequestMethod.GET, "/" + userId + "/friends");
         return userService.getFriendList(userId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getMutualFriendList(@PathVariable("id") Long userId, @PathVariable Long otherId) {
-        String path = "/" + userId + "/friends/common/" + otherId;
-        logRequestMethod(RequestMethod.GET, path);
-        return userService.getMutualFriendList(userId, otherId);
+        logRequestMethod(RequestMethod.GET, "/" + userId + "/friends/common/" + otherId);
+        return userService.getCommonFriendList(userId, otherId);
     }
 
     private void logRequestMethod(RequestMethod requestMethod) {
