@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -49,7 +49,7 @@ class FilmControllerTest {
                 "Фильм со Шварценеггером в главной роли.",
                 LocalDate.of(1984, 10, 26),
                 108);
-        assertThrows(ResponseStatusException.class, () -> filmController.post(newFilm));
+        assertThrows(ValidationException.class, () -> filmController.post(newFilm));
     }
 
     @Test

@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.classes.InMemoryUserStorage;
@@ -41,7 +41,7 @@ class UserControllerTest {
                 "Truelove",
                 "Vladimir",
                 LocalDate.of(1990, 12, 8));
-        assertThrows(ResponseStatusException.class, () -> userController.postUser(newUser));
+        assertThrows(ValidationException.class, () -> userController.postUser(newUser));
     }
 
     @Test
