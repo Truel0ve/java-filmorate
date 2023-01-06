@@ -3,9 +3,9 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +14,7 @@ import java.util.Set;
 @Setter
 public class User {
     private Long id;
-    @Pattern(regexp = "^\\w+@\\w+\\.\\w+$")
+    @Email
     private String email;
     @NotBlank
     private String login;

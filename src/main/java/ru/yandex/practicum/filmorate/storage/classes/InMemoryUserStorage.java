@@ -2,9 +2,8 @@ package ru.yandex.practicum.filmorate.storage.classes;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
@@ -22,8 +21,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.isEmpty() && (users.values()
                     .stream()
                     .anyMatch(someUser -> someUser.getEmail().equals(user.getEmail())))) {
-            log.info("Пользователь с E-mail " + user.getEmail() + " уже есть в базе.");
-            throw new ResponseStatusException(HttpStatus.OK);
+            throw new ValidationException("Пользователь с E-mail " + user.getEmail() + " уже есть в базе.");
         }
         user.setId(++newId);
         users.put(user.getId(), user);

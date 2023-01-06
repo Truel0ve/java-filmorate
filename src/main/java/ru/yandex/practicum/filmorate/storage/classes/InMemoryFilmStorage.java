@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.classes;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
@@ -21,8 +20,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (!films.isEmpty() && films.values()
                 .stream()
                 .anyMatch(someFilm -> someFilm.getName().equals(film.getName()))) {
-            log.info("Фильм \"" + film.getName() + "\" уже есть в базе.");
-            throw new ResponseStatusException(HttpStatus.OK);
+            throw new ValidationException("Фильм \"" + film.getName() + "\" уже есть в базе.");
         }
         film.setId(++newId);
         films.put(film.getId(), film);
