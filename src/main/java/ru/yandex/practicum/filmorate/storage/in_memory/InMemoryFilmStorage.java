@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.classes;
+package ru.yandex.practicum.filmorate.storage.in_memory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

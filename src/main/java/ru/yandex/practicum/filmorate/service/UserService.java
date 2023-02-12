@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.classes.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Getter
 public class UserService implements UserStorage {
-    private final InMemoryUserStorage userStorage;
+    private final UserDbStorage userStorage;
     private final UserValidator userValidator;
 
     @Override

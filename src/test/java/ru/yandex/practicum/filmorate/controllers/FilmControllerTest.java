@@ -7,8 +7,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.classes.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.classes.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.in_memory.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.in_memory.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
