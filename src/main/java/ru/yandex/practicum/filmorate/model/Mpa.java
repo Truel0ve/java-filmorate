@@ -7,23 +7,22 @@ import lombok.Setter;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class Genre {
+public class Mpa {
     private final int id;
     private final String name;
 
     @Getter
-    public enum GenreType {
-        COMEDY (1,"Комедия"),
-        DRAMA (2,"Драма"),
-        CARTOON (3,"Мультфильм"),
-        THRILLER (4,"Триллер"),
-        DOCUMENTARY (5,"Документальный"),
-        ACTION (6,"Боевик");
+    public enum MpaType {
+        G (1, "G"),
+        PG (2,"PG"),
+        PG13 (3,"PG-13"),
+        R (4,"R"),
+        NC17 (5,"NC-17");
 
         private final int id;
         private final String name;
 
-        GenreType(int id, String name) {
+        MpaType(int id, String name) {
             this.id = id;
             this.name = name;
         }
