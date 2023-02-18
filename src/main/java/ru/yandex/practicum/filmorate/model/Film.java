@@ -27,6 +27,27 @@ public class Film implements Comparable<Film> {
     private List<Genre> genres;
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        Film film = (Film) obj;
+        return name.equals(film.getName()) &&
+                description.equals(film.getDescription()) &&
+                releaseDate.equals(film.getReleaseDate()) &&
+                duration.equals(film.getDuration()) &&
+                mpa.equals(film.getMpa());
+    }
+
+    @Override
+    public int hashCode() {
+        return id.intValue();
+    }
+
+    @Override
     public int compareTo(Film film) {
         return (this.likes.size() > film.getLikes().size()) ? -1 : 1;
     }

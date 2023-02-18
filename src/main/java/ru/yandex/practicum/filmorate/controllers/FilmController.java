@@ -32,19 +32,19 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film post(@Valid @RequestBody Film film) {
+    public Film postFilm(@Valid @RequestBody Film film) {
         logRequestMethod(RequestMethod.POST);
         return filmService.createFilm(film);
     }
 
     @PutMapping
-    public Film put(@Valid @RequestBody Film film) {
+    public Film putFilm(@Valid @RequestBody Film film) {
         logRequestMethod(RequestMethod.PUT);
         return filmService.updateFilm(film);
     }
 
     @DeleteMapping
-    public void delete(@Valid @RequestBody Film film) {
+    public void deleteFilm(@Valid @RequestBody Film film) {
         logRequestMethod(RequestMethod.DELETE);
         filmService.deleteFilm(film);
     }

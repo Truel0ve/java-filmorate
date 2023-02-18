@@ -30,11 +30,12 @@ class UserValidatorTest {
 
     @Test
     void shouldNotValidateIfUserEmailIsNull() {
-        user = new User(
-                null,
-                "Truelove",
-                "Pavel",
-                LocalDate.of(1990, 12, 8));
+        user = User.builder()
+                .email(null)
+                .login("Truelove")
+                .name("Pavel")
+                .birthday(LocalDate.of(1990, 12, 8))
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
         assertEquals("E-mail не указан.",
@@ -43,11 +44,12 @@ class UserValidatorTest {
 
     @Test
     void shouldNotValidateIfUserEmailIsBlank() {
-        user = new User(
-                " ",
-                "Truelove",
-                "Pavel",
-                LocalDate.of(1990, 12, 8));
+        user = User.builder()
+                .email(" ")
+                .login("Truelove")
+                .name("Pavel")
+                .birthday(LocalDate.of(1990, 12, 8))
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
         assertEquals("E-mail не указан.",
@@ -56,11 +58,12 @@ class UserValidatorTest {
 
     @Test
     void shouldNotValidateIfUserEmailHasNotDogChar() {
-        user = new User(
-                "truelove.yandex.ru",
-                "Truelove",
-                "Pavel",
-                LocalDate.of(1990, 12, 8));
+        user = User.builder()
+                .email("truelove.yandex.ru")
+                .login("Truelove")
+                .name("Pavel")
+                .birthday(LocalDate.of(1990, 12, 8))
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
         assertEquals("Неверно указан E-mail: " + user.getEmail(),
@@ -69,11 +72,12 @@ class UserValidatorTest {
 
     @Test
     void shouldNotValidateIfUserLoginIsNull() {
-        user = new User(
-                "truelove@yandex.ru",
-                null,
-                "Pavel",
-                LocalDate.of(1990, 12, 8));
+        user = User.builder()
+                .email("truelove@yandex.ru")
+                .login(null)
+                .name("Pavel")
+                .birthday(LocalDate.of(1990, 12, 8))
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
         assertEquals("Логин не указан.",
@@ -82,11 +86,12 @@ class UserValidatorTest {
 
     @Test
     void shouldNotValidateIfUserLoginIsBlank() {
-        user = new User(
-                "truelove@yandex.ru",
-                " ",
-                "Pavel",
-                LocalDate.of(1990, 12, 8));
+        user = User.builder()
+                .email("truelove@yandex.ru")
+                .login(" ")
+                .name("Pavel")
+                .birthday(LocalDate.of(1990, 12, 8))
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
         assertEquals("Логин не указан.",
@@ -95,11 +100,12 @@ class UserValidatorTest {
 
     @Test
     void shouldNotValidateIfUserLoginContainsSpace() {
-        user = new User(
-                "truelove@yandex.ru",
-                "True love",
-                "Pavel",
-                LocalDate.of(1990, 12, 8));
+        user = User.builder()
+                .email("truelove@yandex.ru")
+                .login("True love")
+                .name("Pavel")
+                .birthday(LocalDate.of(1990, 12, 8))
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
         assertEquals("Некорректный логин: " + user.getLogin(),
@@ -108,33 +114,36 @@ class UserValidatorTest {
 
     @Test
     void shouldSetUserNameIfUserNameIsNull() {
-        user = new User(
-                "truelove@yandex.ru",
-                "Truelove",
-                null,
-                LocalDate.of(1990, 12, 8));
+        user = User.builder()
+                .email("truelove@yandex.ru")
+                .login("Truelove")
+                .name(null)
+                .birthday(LocalDate.of(1990, 12, 8))
+                .build();
         assertDoesNotThrow(() -> userValidator.validate(user));
         assertEquals(user.getLogin(), user.getName(), "Имя пользователя и логин не совпадают");
     }
 
     @Test
     void shouldSetUserNameIfUserNameIsBlank() {
-        user = new User(
-                "truelove@yandex.ru",
-                "Truelove",
-                " ",
-                LocalDate.of(1990, 12, 8));
+        user = User.builder()
+                .email("truelove@yandex.ru")
+                .login("Truelove")
+                .name(" ")
+                .birthday(LocalDate.of(1990, 12, 8))
+                .build();
         assertDoesNotThrow(() -> userValidator.validate(user));
         assertEquals(user.getLogin(), user.getName(), "Имя пользователя и логин не совпадают");
     }
 
     @Test
     void shouldNotValidateIfUserBirthdayIsNull() {
-        user = new User(
-                "truelove@yandex.ru",
-                "Truelove",
-                "Pavel",
-                null);
+        user = User.builder()
+                .email("truelove@yandex.ru")
+                .login("Truelove")
+                .name("Pavel")
+                .birthday(null)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
         assertEquals("Дата рождения не указана.",
@@ -143,11 +152,12 @@ class UserValidatorTest {
 
     @Test
     void shouldNotValidateIfUserBirthdayIsAfterNow() {
-        user = new User(
-                "truelove@yandex.ru",
-                "Truelove",
-                "Pavel",
-                LocalDate.of(2023, 12, 8));
+        user = User.builder()
+                .email("truelove@yandex.ru")
+                .login("Truelove")
+                .name("Pavel")
+                .birthday(LocalDate.of(2023, 12, 8))
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> userValidator.validate(user));
         assertEquals("Неверно указана дата рождения: " + user.getBirthday().

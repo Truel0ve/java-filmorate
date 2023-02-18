@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS mpa (
-	mpa_id  	INTEGER			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	mpa_id  	    INTEGER			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	mpa_name 		VARCHAR(20)		UNIQUE NOT NULL
 );
 
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS films (
 	release_date 	DATE 			NOT NULL CHECK (release_date >= '1895-12-28'),
 	duration 		INTEGER 		NOT NULL CHECK (duration > 0),
 	rate			BIGINT			,
-	mpa_id 		    INTEGER 		REFERENCES mpa_rating (rating_id) ON DELETE CASCADE
+	mpa_id 		    INTEGER 		REFERENCES mpa (mpa_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS genres (
