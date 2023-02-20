@@ -4,11 +4,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -17,9 +18,7 @@ import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,15 +36,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film createFilm(Film film) {
         try {
-            String sqlSelectName =
-                    "SELECT name " +
-                    "FROM films " +
-                    "WHERE name = ?";
-            String name = jdbcTemplate.queryForObject(sqlSelectName, String.class, film.getName());
-            if (Objects.equals(name, film.getName())) {
-                throw new ValidationException("Фильм \"" + film.getName() + "\" уже есть в базе.");
-            }
-        } catch (EmptyResultDataAccessException e) {
             String sqlInsertFilm =
                     "INSERT INTO films (name, description, release_date, duration, mpa_id)" +
                     "VALUES (?, ?, ?, ?, ?)";
@@ -62,9 +52,11 @@ public class FilmDbStorage implements FilmStorage {
             Long filmId = Objects.requireNonNull(keyHolder.getKey()).longValue();
             film.setId(filmId);
             if (film.getGenres() != null) {
-                film.setGenres(genreDbStorage.validateGenres(film));
+                film.setGenres(genreDbStorage.setGenres(film));
             }
             log.info("Добавлен новый фильм \"" + film.getName() + "\".");
+        } catch (DuplicateKeyException e) {
+            throw new ValidationException("Фильм \"" + film.getName() + "\" уже есть в базе.");
         }
         return film;
     }
@@ -83,7 +75,7 @@ public class FilmDbStorage implements FilmStorage {
                     "DELETE FROM genre_list " +
                     "WHERE film_id = ?";
             jdbcTemplate.update(sqlDeleteGenres, film.getId());
-            film.setGenres(genreDbStorage.validateGenres(film));
+            film.setGenres(genreDbStorage.setGenres(film));
         }
         log.info("Внесены изменения в данные фильма \"" + film.getName() + "\".");
         return film;
@@ -95,46 +87,49 @@ public class FilmDbStorage implements FilmStorage {
         String sqlDeleteFilm =
                 "DELETE FROM films " +
                 "WHERE film_id = ?";
-                jdbcTemplate.update(sqlDeleteFilm, film.getId());
+        jdbcTemplate.update(sqlDeleteFilm, film.getId());
+        String sqlDeleteGenres =
+                "DELETE FROM genre_list " +
+                "WHERE film_id = ?";
+        jdbcTemplate.update(sqlDeleteGenres, film.getId());
         log.info("Фильм \"" + film.getName() + "\" удален из базы.");
     }
 
     // Получить данные фильма по ID
-    public Film getFilmById(Long filmId) throws NullPointerException {
+    public Film getFilmById(Long filmId) {
         String sqlSelectFilm =
-                "SELECT * " +
-                "FROM films " +
-                "LEFT JOIN mpa ON films.mpa_id = mpa.mpa_id " +
-                "WHERE film_id = ?";
-        String sqlSelectGenres =
-                "SELECT gl.genre_id, g.genre_name " +
-                "FROM genre_list AS gl " +
-                "LEFT JOIN genres AS g ON gl.genre_id = g.genre_id " +
-                "WHERE gl.film_id = ? " +
-                "ORDER BY gl.genre_id ASC";
-        String sqlSelectLikes =
-                "SELECT user_id " +
-                "FROM like_list " +
-                "WHERE film_id = ? " +
-                "ORDER BY user_id ASC";
-        Film film = jdbcTemplate.query(sqlSelectFilm, new FilmRowMapper(), filmId).stream()
+                "SELECT f.*, m.mpa_name, g.*, ll.user_id " +
+                "FROM films AS f " +
+                "LEFT JOIN mpa AS m ON m.mpa_id = f.mpa_id " +
+                "LEFT JOIN genre_list AS gl ON gl.film_id = f.film_id " +
+                "LEFT JOIN genres AS g ON g.genre_id = gl.genre_id " +
+                "LEFT JOIN like_list AS ll ON ll.film_id = f.film_id " +
+                "WHERE f.film_id = ? " +
+                "ORDER BY gl.genre_id ASC, ll.user_id ASC";
+        Set<Long> likes = new HashSet<>();
+        Set<Genre> genres = new HashSet<>();
+        List<Film> filmList = jdbcTemplate.queryForStream(sqlSelectFilm, new FilmRowMapper(), filmId)
+                .peek(film -> {
+                    likes.addAll(film.getLikes());
+                    genres.addAll(film.getGenres());
+                }).collect(Collectors.toList());
+        return filmList.stream()
                 .findFirst()
-                .orElseThrow(() -> new NullPointerException("Фильм с ID=" + filmId + " отсутствует в базе"));
-        film.setGenres(jdbcTemplate.query(sqlSelectGenres,
-                (rs, rowNum) -> new Genre(rs.getInt("genre_id"), rs.getString("genre_name")), filmId));
-        film.setLikes(new HashSet<>(jdbcTemplate.query(sqlSelectLikes,
-                (rs, rowNum) -> rs.getLong("user_id"), filmId)));
-        return film;
+                .map(film -> {
+                    film.setLikes(likes);
+                    film.setGenres(genres);
+                    return film;
+                })
+                .orElseThrow(() -> new ArgumentNotFoundException("Фильм с ID=" + filmId + " отсутствует в базе"));
     }
 
     // Получить список всех фильмов
     public Map<Long, Film> getAllFilms() {
-        String sqlSelectAll =
-                "SELECT * " +
-                "FROM films " +
-                "LEFT JOIN mpa ON films.mpa_id = mpa.mpa_id";
-        return jdbcTemplate.queryForStream(sqlSelectAll, new FilmRowMapper())
-                .map(film -> getFilmById(film.getId()))
+        String sqlSelectAllId =
+                "SELECT film_id " +
+                "FROM films";
+        return jdbcTemplate.queryForStream(sqlSelectAllId, (rs, rowNum) -> rs.getLong("film_id"))
+                .map(this::getFilmById)
                 .collect(Collectors.toMap(Film::getId, film -> film));
     }
 }

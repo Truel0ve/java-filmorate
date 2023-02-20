@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class MpaDbStorage {
                 (rs, rowNum) -> new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name")), id);
         return mpaList.stream()
                 .findFirst()
-                .orElseThrow(() -> new NullPointerException("MPA-рейтинг с ID=" + id + " отсутствует в базе"));
+                .orElseThrow(() -> new ArgumentNotFoundException("MPA-рейтинг с ID=" + id + " отсутствует в базе"));
     }
 
     // Получить список всех доступных MPA-рейтингов фильмов

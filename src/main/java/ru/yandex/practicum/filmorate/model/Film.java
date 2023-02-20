@@ -6,7 +6,6 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -24,7 +23,7 @@ public class Film implements Comparable<Film> {
     private Set<Long> likes;
     private Long rate;
     private Mpa mpa;
-    private List<Genre> genres;
+    private Set<Genre> genres;
 
     @Override
     public boolean equals(Object obj) {
@@ -49,6 +48,8 @@ public class Film implements Comparable<Film> {
 
     @Override
     public int compareTo(Film film) {
-        return (this.likes.size() > film.getLikes().size()) ? -1 : 1;
+        int compareLikes = Long.compare(film.getLikes().size(), likes.size());
+        int compareId = Long.compare(id, film.getId());
+        return (compareLikes != 0) ? compareLikes : compareId;
     }
 }

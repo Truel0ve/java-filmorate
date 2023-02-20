@@ -4,11 +4,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.database.rowmappers.UserRowMapper;
@@ -33,15 +34,6 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User createUser(User user) {
         try {
-            String sqlSelectEmail =
-                    "SELECT email " +
-                    "FROM users " +
-                    "WHERE email = ?";
-            String email = jdbcTemplate.queryForObject(sqlSelectEmail, String.class, user.getEmail());
-            if (Objects.equals(email, user.getEmail())) {
-                throw new ValidationException("Пользователь с E-mail " + user.getEmail() + " уже есть в базе.");
-            }
-        } catch (EmptyResultDataAccessException e) {
             String sqlInsertUser =
                     "INSERT INTO users (email, login, name, birthday) " +
                     "VALUES (?, ?, ?, ?)";
@@ -57,6 +49,8 @@ public class UserDbStorage implements UserStorage {
             Long userId = Objects.requireNonNull(keyHolder.getKey()).longValue();
             user.setId(userId);
             log.info("Добавлен новый пользователь с ID=" + userId + ".");
+        } catch (DuplicateKeyException e) {
+            throw new ValidationException("Пользователь с логином " + user.getLogin() + " и E-mail " + user.getEmail() + " уже есть в базе.");
         }
         return user;
     }
@@ -80,11 +74,16 @@ public class UserDbStorage implements UserStorage {
                 "DELETE FROM users " +
                 "WHERE user_id = ?";
         jdbcTemplate.update(sqlDeleteUser, user.getId());
+        String sqlDeleteFriends =
+                "DELETE FROM friend_list " +
+                "WHERE user_id = ? " +
+                "AND friend_id = ?";
+        jdbcTemplate.update(sqlDeleteFriends, user.getId(), user.getId());
         log.info("Пользователь с ID=" + user.getId() + " удален из базы.");
     }
 
     // Получить данные пользователя по ID
-    public User getUserById(Long userId) throws NullPointerException {
+    public User getUserById(Long userId) {
         String sqlSelectUser =
                 "SELECT * " +
                 "FROM users " +
@@ -92,7 +91,7 @@ public class UserDbStorage implements UserStorage {
         List<User> userList = jdbcTemplate.query(sqlSelectUser, new UserRowMapper(), userId);
         return userList.stream()
                 .findFirst()
-                .orElseThrow(() -> new NullPointerException("Пользователь с ID=" + userId + " отсутствует в базе"));
+                .orElseThrow(() -> new ArgumentNotFoundException("Пользователь с ID=" + userId + " отсутствует в базе"));
     }
 
     // Получить список всех пользователей

@@ -5,10 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -28,7 +31,7 @@ public class GenreDbStorage {
                 (rs, rowNum) -> new Genre(rs.getInt("genre_id"), rs.getString("genre_name")), id);
         return genres.stream()
                 .findFirst()
-                .orElseThrow(() -> new NullPointerException("Жанр с ID=" + id + " отсутствует в базе"));
+                .orElseThrow(() -> new ArgumentNotFoundException("Жанр с ID=" + id + " отсутствует в базе"));
     }
 
     // Получить все доступные жанры фильмов
@@ -41,20 +44,35 @@ public class GenreDbStorage {
                 (rs, rowNum) -> new Genre(rs.getInt("genre_id"), rs.getString("genre_name")));
     }
 
+    // Сохранить переданные жанры фильма
+    public Set<Genre> setGenres(Film film) {
+        return updateGenres(validateGenres(film), film);
+    }
+
     // Проверить и отсортировать жанры передаваемого фильма
-    public List<Genre> validateGenres(Film film) {
-        List<Genre> validatedGenres = film.getGenres().stream()
+    private Set<Genre> validateGenres(Film film) {
+        return film.getGenres().stream()
                 .map(Genre::getId)
                 .distinct()
                 .filter(id -> id > 0 && id <= Genre.GenreType.values().length)
+                .sorted()
                 .map(this::getGenreById)
-                .collect(Collectors.toList());
-        for (Genre genre : validatedGenres) {
-            String sqlInsertGenres =
-                    "INSERT INTO genre_list (genre_id, film_id) " +
-                    "VALUES (?,?)";
-            jdbcTemplate.update(sqlInsertGenres, genre.getId(), film.getId());
+                .collect(Collectors.toSet());
+    }
+
+    // Сохранить пакет ID жанров и фильмов в базу данных
+    private Set<Genre> updateGenres(Set<Genre> genres, Film film) {
+        List<Object[]> batch = new ArrayList<>();
+        for (Genre genre : genres) {
+            Object[] values = new Object[] {
+                    genre.getId(),
+                    film.getId()};
+            batch.add(values);
         }
-        return validatedGenres;
+        String sqlInsertGenres =
+                "INSERT INTO genre_list (genre_id, film_id) " +
+                "VALUES (?,?)";
+        jdbcTemplate.batchUpdate(sqlInsertGenres, batch);
+        return genres;
     }
 }
