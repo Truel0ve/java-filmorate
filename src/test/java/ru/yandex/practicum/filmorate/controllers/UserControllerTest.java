@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -75,7 +76,7 @@ class UserControllerTest {
         newUser.setId(null);
         assertThrows(NullPointerException.class, () -> userController.putUser(newUser));
         newUser.setId(2L);
-        assertThrows(NullPointerException.class, () -> userController.putUser(newUser));
+        assertThrows(ArgumentNotFoundException.class, () -> userController.putUser(newUser));
     }
 
     @Test
@@ -93,7 +94,7 @@ class UserControllerTest {
         assertEquals(user, userController.getUserById(user.getId()),
                 "Пользователь не соответствует ожидаемому значению.");
         userController.deleteUser(user);
-        assertThrows(NullPointerException.class,
+        assertThrows(ArgumentNotFoundException.class,
                 () -> userController.getUserById(user.getId()));
     }
 

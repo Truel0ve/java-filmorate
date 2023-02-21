@@ -13,7 +13,7 @@ import java.util.Set;
 @Builder
 public class User {
     private Long id;
-    @Email(message = "все плохо")
+    @Email
     private String email;
     @NotBlank
     private String login;

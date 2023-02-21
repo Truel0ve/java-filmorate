@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,7 +51,7 @@ public class UserService implements UserStorage {
 
     // Получить список всех пользователей
     public List<User> getAllUsers() {
-        return new ArrayList<>(userStorage.getAllUsers().values());
+        return userStorage.getAllUsers();
     }
 
     // Добавить пользователя в друзья
@@ -91,7 +90,7 @@ public class UserService implements UserStorage {
 
     // Проверить корректность передаваемого ID пользователя
     public void validateUserId(Long userId) {
-        if (userId == null || !userStorage.getAllUsers().containsKey(userId)) {
+        if (userId == null || userStorage.getUserById(userId) == null) {
             throw new NullPointerException("ID пользователя не задан или отсутствует в базе.");
         }
     }

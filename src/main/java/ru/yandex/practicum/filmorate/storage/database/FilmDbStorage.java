@@ -108,11 +108,13 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY gl.genre_id ASC, ll.user_id ASC";
         Set<Long> likes = new HashSet<>();
         Set<Genre> genres = new HashSet<>();
-        List<Film> filmList = jdbcTemplate.queryForStream(sqlSelectFilm, new FilmRowMapper(), filmId)
-                .peek(film -> {
-                    likes.addAll(film.getLikes());
-                    genres.addAll(film.getGenres());
-                }).collect(Collectors.toList());
+        List<Film> filmList = jdbcTemplate.query(sqlSelectFilm, new FilmRowMapper(), filmId);
+        if (!filmList.isEmpty()) {
+            for (Film film : filmList) {
+                likes.addAll(film.getLikes());
+                genres.addAll(film.getGenres());
+            }
+        }
         return filmList.stream()
                 .findFirst()
                 .map(film -> {
@@ -124,12 +126,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     // Получить список всех фильмов
-    public Map<Long, Film> getAllFilms() {
+    public List<Film> getAllFilms() {
         String sqlSelectAllId =
                 "SELECT film_id " +
                 "FROM films";
         return jdbcTemplate.queryForStream(sqlSelectAllId, (rs, rowNum) -> rs.getLong("film_id"))
                 .map(this::getFilmById)
-                .collect(Collectors.toMap(Film::getId, film -> film));
+                .collect(Collectors.toList());
     }
 }

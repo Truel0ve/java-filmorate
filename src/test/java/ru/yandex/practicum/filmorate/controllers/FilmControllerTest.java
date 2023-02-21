@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -84,7 +85,7 @@ class FilmControllerTest {
         newFilm.setId(null);
         assertThrows(NullPointerException.class, () -> filmController.putFilm(newFilm));
         newFilm.setId(2L);
-        assertThrows(NullPointerException.class, () -> filmController.putFilm(newFilm));
+        assertThrows(ArgumentNotFoundException.class, () -> filmController.putFilm(newFilm));
     }
 
     @Test
@@ -102,7 +103,7 @@ class FilmControllerTest {
         assertEquals(film, filmController.getFilmById(film.getId()),
                 "Фильм не соответствует ожидаемому значению.");
         filmController.deleteFilm(film);
-        assertThrows(NullPointerException.class,
+        assertThrows(ArgumentNotFoundException.class,
                 () -> filmController.getFilmById(film.getId()));
     }
 

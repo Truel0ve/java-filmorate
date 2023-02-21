@@ -19,7 +19,6 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 @Primary
@@ -95,11 +94,10 @@ public class UserDbStorage implements UserStorage {
     }
 
     // Получить список всех пользователей
-    public Map<Long, User> getAllUsers() {
+    public List<User> getAllUsers() {
         String sqlSelectAll =
                 "SELECT * " +
                 "FROM users";
-        Stream<User> userStream = jdbcTemplate.queryForStream(sqlSelectAll, new UserRowMapper());
-        return userStream.collect(Collectors.toMap(User::getId, user -> user));
+        return jdbcTemplate.queryForStream(sqlSelectAll, new UserRowMapper()).collect(Collectors.toList());
     }
 }

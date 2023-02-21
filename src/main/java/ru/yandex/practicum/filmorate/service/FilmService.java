@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.database.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -55,7 +54,7 @@ public class FilmService implements FilmStorage {
 
     // Получить список всех фильмов
     public List<Film> getAllFilms() {
-        return new ArrayList<>(filmStorage.getAllFilms().values());
+        return filmStorage.getAllFilms();
     }
 
     // Поставить лайк фильму от пользователя
@@ -74,7 +73,7 @@ public class FilmService implements FilmStorage {
 
     // Отсортировать список всех фильмов по убыванию от наиболее популярных к наименее популярным по количеству лайков
     public Set<Film> getPopularFilms() {
-        return new TreeSet<>(filmStorage.getAllFilms().values());
+        return new TreeSet<>(getAllFilms());
     }
 
     // Получить MPA-рейтинг фильма по ID
@@ -99,7 +98,7 @@ public class FilmService implements FilmStorage {
 
     // Проверить корректность передаваемого ID фильма
     private void validateFilmId(Long filmId) {
-        if (filmId == null || !filmStorage.getAllFilms().containsKey(filmId)) {
+        if (filmId == null || filmStorage.getFilmById(filmId) == null) {
             throw new NullPointerException("ID фильма не задан или отсутствует в базе.");
         }
     }
