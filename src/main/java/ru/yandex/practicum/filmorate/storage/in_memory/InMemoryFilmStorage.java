@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.classes;
+package ru.yandex.practicum.filmorate.storage.in_memory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -51,13 +51,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(filmId);
     }
 
-    @Override
     public void addLike(Long filmId, Long userId) {
         films.get(filmId).getLikes().add(userId);
         log.info("Пользователь с ID=" + userId + " поставил лайк фильму \"" + films.get(filmId).getName() + "\".");
     }
 
-    @Override
     public void deleteLike(Long filmId, Long userId) {
         films.get(filmId).getLikes().remove(userId);
         log.info("Пользователь с ID=" + userId + " убрал лайк фильму \"" + films.get(filmId).getName() + "\".");

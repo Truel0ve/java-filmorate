@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.validators;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
@@ -10,7 +9,6 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
 class FilmValidatorTest {
     private FilmValidator filmValidator;
     private Film film;
@@ -31,12 +29,13 @@ class FilmValidatorTest {
 
     @Test
     void shouldNotValidateIfFilmNameIsNull() {
-        film = new Film(
-                null,
-                "История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
-                        "пост-апокалиптического будущего.",
-                LocalDate.of(1984, 10, 26),
-                108);
+        film = Film.builder()
+                .name(null)
+                .description("История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
+                        "пост-апокалиптического будущего.")
+                .releaseDate(LocalDate.of(1984, 10, 26))
+                .duration(108)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> filmValidator.validate(film));
         assertEquals("Название фильма не указано.",
@@ -45,12 +44,13 @@ class FilmValidatorTest {
 
     @Test
     void shouldNotValidateIfFilmNameIsBlank() {
-        film = new Film(
-                " ",
-                "История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
-                        "пост-апокалиптического будущего.",
-                LocalDate.of(1984, 10, 26),
-                108);
+        film = Film.builder()
+                .name(" ")
+                .description("История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
+                        "пост-апокалиптического будущего.")
+                .releaseDate(LocalDate.of(1984, 10, 26))
+                .duration(108)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> filmValidator.validate(film));
         assertEquals("Название фильма не указано.",
@@ -59,11 +59,12 @@ class FilmValidatorTest {
 
     @Test
     void shouldNotValidateIfFilmDescriptionIsNull() {
-        film = new Film(
-                "Терминатор",
-                null,
-                LocalDate.of(1984, 10, 26),
-                108);
+        film = Film.builder()
+                .name("Терминатор")
+                .description(null)
+                .releaseDate(LocalDate.of(1984, 10, 26))
+                .duration(108)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> filmValidator.validate(film));
         assertEquals("Описание фильма не указано.",
@@ -72,11 +73,12 @@ class FilmValidatorTest {
 
     @Test
     void shouldNotValidateIfFilmDescriptionIsBlank() {
-        film = new Film(
-                "Терминатор",
-                " ",
-                LocalDate.of(1984, 10, 26),
-                108);
+        film = Film.builder()
+                .name("Терминатор")
+                .description(" ")
+                .releaseDate(LocalDate.of(1984, 10, 26))
+                .duration(108)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> filmValidator.validate(film));
         assertEquals("Описание фильма не указано.",
@@ -85,15 +87,16 @@ class FilmValidatorTest {
 
     @Test
     void shouldNotValidateIfFilmDescriptionIsMoreThen200() {
-        film = new Film(
-                "Терминатор",
-                "История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
+        film = Film.builder()
+                .name("Терминатор")
+                .description("История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
                         "пост-апокалиптического будущего, где миром правят машины-убийцы, а человечество находится на " +
                         "грани вымирания. Цель киборга: убить девушку по имени Сара Коннор, чей ещё нерождённый сын к " +
                         "2029 году выиграет войну человечества с машинами. Цель Риза: спасти Сару и остановить " +
-                        "Терминатора любой ценой.",
-                LocalDate.of(1984, 10, 26),
-                108);
+                        "Терминатора любой ценой.")
+                .releaseDate(LocalDate.of(1984, 10, 26))
+                .duration(108)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> filmValidator.validate(film));
         assertEquals("Описание фильма не может превышать 200 символов.",
@@ -102,25 +105,27 @@ class FilmValidatorTest {
 
     @Test
     void shouldValidateIfFilmDescriptionIs200() {
-        film = new Film(
-                "Терминатор",
-                "История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год" +
+        film = Film.builder()
+                .name("Терминатор")
+                .description("История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год" +
                         " из пост-апокалиптического будущего, где миром правят машины-убийцы, а человечество находится" +
-                        " на грани вымирания.",
-                LocalDate.of(1984, 10, 26),
-                108);
+                        " на грани вымирания.")
+                .releaseDate(LocalDate.of(1984, 10, 26))
+                .duration(108)
+                .build();
         assertEquals(200, film.getDescription().length());
         assertDoesNotThrow(() -> filmValidator.validate(film));
     }
 
     @Test
     void shouldNotValidateIfFilmReleaseDateIsNull() {
-        film = new Film(
-                "Терминатор",
-                "История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
-                        "пост-апокалиптического будущего.",
-                null,
-                108);
+        film = Film.builder()
+                .name("Терминатор")
+                .description("История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
+                        "пост-апокалиптического будущего.")
+                .releaseDate(null)
+                .duration(108)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> filmValidator.validate(film));
         assertEquals("Дата релиза не указана.",
@@ -129,12 +134,13 @@ class FilmValidatorTest {
 
     @Test
     void shouldNotValidateIfFilmReleaseDateIsLess1895_12_28() {
-        film = new Film(
-                "Терминатор",
-                "История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
-                        "пост-апокалиптического будущего.",
-                LocalDate.of(1895, 12, 27),
-                108);
+        film = Film.builder()
+                .name("Терминатор")
+                .description("История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
+                        "пост-апокалиптического будущего.")
+                .releaseDate(LocalDate.of(1895, 12, 27))
+                .duration(108)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> filmValidator.validate(film));
         assertEquals("Дата релиза не может быть раньше 28 декабря 1895 года.",
@@ -143,23 +149,25 @@ class FilmValidatorTest {
 
     @Test
     void shouldValidateIfFilmReleaseDateIs1895_12_28() {
-        film = new Film(
-                "Терминатор",
-                "История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
-                        "пост-апокалиптического будущего.",
-                LocalDate.of(1895, 12, 28),
-                108);
+        film = Film.builder()
+                .name("Терминатор")
+                .description("История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
+                        "пост-апокалиптического будущего.")
+                .releaseDate(LocalDate.of(1895, 12, 28))
+                .duration(108)
+                .build();
         assertDoesNotThrow(() -> filmValidator.validate(film));
     }
 
     @Test
     void shouldNotValidateIfFilmDurationIsNull() {
-        film = new Film(
-                "Терминатор",
-                "История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
-                        "пост-апокалиптического будущего.",
-                LocalDate.of(1984, 10, 26),
-                null);
+        film = Film.builder()
+                .name("Терминатор")
+                .description("История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
+                        "пост-апокалиптического будущего.")
+                .releaseDate(LocalDate.of(1984, 10, 26))
+                .duration(null)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> filmValidator.validate(film));
         assertEquals("Продолжительность фильма не указана.",
@@ -168,12 +176,13 @@ class FilmValidatorTest {
 
     @Test
     void shouldNotValidateIfFilmDurationIsZero() {
-        film = new Film(
-                "Терминатор",
-                "История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
-                        "пост-апокалиптического будущего.",
-                LocalDate.of(1984, 10, 26),
-                0);
+        film = Film.builder()
+                .name("Терминатор")
+                .description("История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
+                        "пост-апокалиптического будущего.")
+                .releaseDate(LocalDate.of(1984, 10, 26))
+                .duration(0)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> filmValidator.validate(film));
         assertEquals("Продолжительность фильма не может быть меньше или равна 0.",
@@ -182,12 +191,13 @@ class FilmValidatorTest {
 
     @Test
     void shouldNotValidateIfFilmDurationIsNegative() {
-        film = new Film(
-                "Терминатор",
-                "История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
-                        "пост-апокалиптического будущего.",
-                LocalDate.of(1984, 10, 26),
-                -100);
+        film = Film.builder()
+                .name("Терминатор")
+                .description("История противостояния солдата Кайла Риза и киборга-терминатора, прибывших в 1984-й год из " +
+                        "пост-апокалиптического будущего.")
+                .releaseDate(LocalDate.of(1984, 10, 26))
+                .duration(-100)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> filmValidator.validate(film));
         assertEquals("Продолжительность фильма не может быть меньше или равна 0.",

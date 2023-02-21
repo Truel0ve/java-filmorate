@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.classes;
+package ru.yandex.practicum.filmorate.storage.in_memory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,18 +52,16 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(userId);
     }
 
-    @Override
     public void addFriend(Long userId, Long friendId) {
         users.get(userId).getFriends().add(friendId);
         users.get(friendId).getFriends().add(userId);
         log.info("Пользователи с ID=" + userId + " и ID=" + friendId + " стали друзьями.");
     }
 
-    @Override
     public void deleteFriend(Long userId, Long friendId) {
         users.get(userId).getFriends().remove(friendId);
         users.get(friendId).getFriends().remove(userId);
-        log.info("Пользователи с ID=" + userId + " и ID=" + friendId + " стали друзьями.");
+        log.info("Пользователи с ID=" + userId + " и ID=" + friendId + " больше не являются друзьями.");
     }
 
     public Set<Long> getFriends(Long userId) {
