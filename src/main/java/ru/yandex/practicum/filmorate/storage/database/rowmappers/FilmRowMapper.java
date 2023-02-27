@@ -7,8 +7,9 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FilmRowMapper implements RowMapper<Film> {
 
@@ -22,14 +23,25 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .duration(rs.getInt("duration"))
                 .likes(new HashSet<>())
                 .rate(rs.getLong("rate"))
-                .mpa(new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name")))
+                .mpa(new Mpa(rs.getLong("mpa_id"), rs.getString("mpa_name")))
                 .genres(new HashSet<>())
                 .build();
-        if (rs.getLong("user_id") > 0) {
-            film.setLikes(Set.of(rs.getLong("user_id")));
+        if (rs.getString("likes") != null) {
+            film.setLikes(Stream.of(rs.getString("likes").split(","))
+                            .map(Long::parseLong)
+                            .collect(Collectors.toSet()));
         }
-        if (rs.getInt("genre_id") > 0) {
-            film.setGenres(Set.of(new Genre(rs.getInt("genre_id"), rs.getString("genre_name"))));
+        if (rs.getString("genre_id") != null ) {
+            List<Long> genresId = Stream.of(rs.getString("genre_id").split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            List<String> genresName = Stream.of(rs.getString("genre_name").split(","))
+                    .collect(Collectors.toList());
+            Set<Genre> genres = new HashSet<>();
+            for (int i = 0; i < genresId.size(); i++) {
+                genres.add(new Genre(genresId.get(i),genresName.get(i)));
+            }
+            film.setGenres(genres);
         }
         return film;
     }

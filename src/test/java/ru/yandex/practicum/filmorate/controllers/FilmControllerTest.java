@@ -29,7 +29,7 @@ class FilmControllerTest {
                     "пост-апокалиптического будущего.")
             .releaseDate(LocalDate.of(1984, 10, 26))
             .duration(108)
-            .mpa(new Mpa(4, "R"))
+            .mpa(new Mpa(4L, "R"))
             .build();
 
     @BeforeEach
@@ -52,7 +52,7 @@ class FilmControllerTest {
                 .description("Фильм со Шварценеггером в главной роли.")
                 .releaseDate(LocalDate.of(1984, 10, 26))
                 .duration(108)
-                .mpa(new Mpa(4, "R"))
+                .mpa(new Mpa(4L, "R"))
                 .build();
         assertThrows(ValidationException.class, () -> filmController.postFilm(newFilm));
     }
@@ -65,7 +65,7 @@ class FilmControllerTest {
                 .description("Фильм со Шварценеггером в главной роли.")
                 .releaseDate(LocalDate.of(1984, 10, 26))
                 .duration(108)
-                .mpa(new Mpa(4, "R"))
+                .mpa(new Mpa(4L, "R"))
                 .build();
         newFilm.setId(film.getId());
         assertEquals(newFilm, filmController.putFilm(newFilm),
@@ -80,7 +80,7 @@ class FilmControllerTest {
                 .description("Фильм со Шварценеггером в главной роли.")
                 .releaseDate(LocalDate.of(1984, 10, 26))
                 .duration(108)
-                .mpa(new Mpa(4, "R"))
+                .mpa(new Mpa(4L, "R"))
                 .build();
         newFilm.setId(null);
         assertThrows(NullPointerException.class, () -> filmController.putFilm(newFilm));

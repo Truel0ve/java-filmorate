@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
 import lombok.Getter;
 
-@Data
-public class Mpa {
-    private final int id;
-    private final String name;
+public class Mpa extends AbstractData {
+
+    public Mpa(Long id, String name) {
+        super(id, name);
+    }
 
     @Getter
     public enum MpaType {

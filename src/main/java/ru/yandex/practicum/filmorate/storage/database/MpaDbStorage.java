@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.interfaces.MpaStorage;
 
 import java.util.List;
 
@@ -14,29 +15,31 @@ import java.util.List;
 @Primary
 @RequiredArgsConstructor
 @Slf4j
-public class MpaDbStorage {
+public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
     // Получить MPA-рейтинг фильма по ID
-    public Mpa getMpaById(int id) {
+    @Override
+    public Mpa getMpaById(Long id) {
         String sqlSelectMpa =
                 "SELECT * " +
                 "FROM mpa " +
                 "WHERE mpa_id = ?";
         List<Mpa> mpaList = jdbcTemplate.query(sqlSelectMpa,
-                (rs, rowNum) -> new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name")), id);
+                (rs, rowNum) -> new Mpa(rs.getLong("mpa_id"), rs.getString("mpa_name")), id);
         return mpaList.stream()
                 .findFirst()
                 .orElseThrow(() -> new ArgumentNotFoundException("MPA-рейтинг с ID=" + id + " отсутствует в базе"));
     }
 
     // Получить список всех доступных MPA-рейтингов фильмов
+    @Override
     public List<Mpa> getAllMpa() {
         String sqlSelectAll =
                 "SELECT * " +
                 "FROM mpa " +
                 "ORDER BY mpa_id ASC";
         return jdbcTemplate.query(sqlSelectAll,
-                (rs, rowNum) -> new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name")));
+                (rs, rowNum) -> new Mpa(rs.getLong("mpa_id"), rs.getString("mpa_name")));
     }
 }

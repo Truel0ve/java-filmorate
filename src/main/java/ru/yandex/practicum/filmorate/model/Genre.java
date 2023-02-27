@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
 import lombok.Getter;
 
-@Data
-public class Genre {
-    private final int id;
-    private final String name;
+public class Genre extends AbstractData {
+
+    public Genre(Long id, String name) {
+        super(id, name);
+    }
 
     @Getter
     public enum GenreType {

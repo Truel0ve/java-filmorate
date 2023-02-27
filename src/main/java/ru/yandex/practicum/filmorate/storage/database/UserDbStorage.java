@@ -82,6 +82,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     // Получить данные пользователя по ID
+    @Override
     public User getUserById(Long userId) {
         String sqlSelectUser =
                 "SELECT * " +
@@ -94,6 +95,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     // Получить список всех пользователей
+    @Override
     public List<User> getAllUsers() {
         String sqlSelectAll =
                 "SELECT * " +

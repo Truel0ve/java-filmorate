@@ -23,7 +23,7 @@ class GenreControllerTest {
 
     @Test
     void shouldReturnGenreById() {
-        assertEquals(new Genre(1, "Комедия"), genreController.getGenreById(1),
+        assertEquals(new Genre(1L, "Комедия"), genreController.getGenreById(1L),
                 "Фильм не соответствует ожидаемому значению.");
     }
 }

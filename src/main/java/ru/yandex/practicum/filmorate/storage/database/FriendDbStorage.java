@@ -83,6 +83,7 @@ public class FriendDbStorage implements FriendStorage {
     }
 
     // Получить список всех друзей пользователя по ID
+    @Override
     public Set<Long> getAllFriends(Long userId) {
         String sqlSelect =
                 "SELECT friend_id " +

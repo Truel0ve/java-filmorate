@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Slf4j
 @Getter
-public class UserService implements UserStorage {
+public class UserService implements UserStorage, FriendStorage {
     private final UserDbStorage userStorage;
     private final UserValidator userValidator;
 
@@ -44,17 +45,20 @@ public class UserService implements UserStorage {
     }
 
     // Получить данные пользователя по ID
+    @Override
     public User getUserById(Long userId) {
         validateUserId(userId);
         return userStorage.getUserById(userId);
     }
 
     // Получить список всех пользователей
+    @Override
     public List<User> getAllUsers() {
         return userStorage.getAllUsers();
     }
 
     // Добавить пользователя в друзья
+    @Override
     public void addFriend(Long userId, Long friendId) {
         validateUserId(userId);
         validateUserId(friendId);
@@ -62,26 +66,30 @@ public class UserService implements UserStorage {
     }
 
     // Удалить пользователя из друзей
+    @Override
     public void deleteFriend(Long userId, Long friendId) {
         validateUserId(userId);
         validateUserId(friendId);
         userStorage.getFriendDbStorage().deleteFriend(userId, friendId);
     }
 
+    @Override
+    public Set<Long> getAllFriends(Long userId) {
+        validateUserId(userId);
+        return userStorage.getFriendDbStorage().getAllFriends(userId);
+    }
+
     // Получить список всех друзей пользователя по ID
     public List<User> getFriendList(Long userId) {
-        validateUserId(userId);
-        return userStorage.getFriendDbStorage().getAllFriends(userId).stream()
+        return getAllFriends(userId).stream()
                 .map(userStorage::getUserById)
                 .collect(Collectors.toList());
     }
 
     // Получить список общих друзей пользователей с userId и otherId
     public List<User> getCommonFriendList(Long userId, Long otherId) {
-        validateUserId(userId);
-        validateUserId(otherId);
-        Set<Long> friendSet = userStorage.getFriendDbStorage().getAllFriends(userId);
-        Set<Long> otherSet = userStorage.getFriendDbStorage().getAllFriends(otherId);
+        Set<Long> friendSet = getAllFriends(userId);
+        Set<Long> otherSet = getAllFriends(otherId);
         return friendSet.stream()
                 .filter(otherSet::contains)
                 .map(userStorage::getUserById)

@@ -23,7 +23,7 @@ class MpaControllerTest {
 
     @Test
     void shouldReturnMpaById() {
-        assertEquals(new Mpa(1, "G"), mpaController.getMpaById(1),
+        assertEquals(new Mpa(1L, "G"), mpaController.getMpaById(1L),
                 "Фильм не соответствует ожидаемому значению.");
     }
 }

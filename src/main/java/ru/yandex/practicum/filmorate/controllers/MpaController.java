@@ -24,7 +24,7 @@ public class MpaController {
     }
 
     @GetMapping("/{id}")
-    public Mpa getMpaById(@PathVariable("id") int mpaId) {
+    public Mpa getMpaById(@PathVariable("id") Long mpaId) {
         log.debug("Получен запрос GET по адресу: /mpa/" + mpaId);
         return filmService.getMpaById(mpaId);
     }

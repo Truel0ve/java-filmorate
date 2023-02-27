@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,30 +19,32 @@ import java.util.stream.Collectors;
 @Primary
 @RequiredArgsConstructor
 @Slf4j
-public class GenreDbStorage {
+public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
     // Получить жанр фильма по ID
-    public Genre getGenreById(int id) {
+    @Override
+    public Genre getGenreById(Long id) {
         String sqlSelectGenre =
                 "SELECT * " +
                 "FROM genres " +
                 "WHERE genre_id = ?";
         List<Genre> genres = jdbcTemplate.query(sqlSelectGenre,
-                (rs, rowNum) -> new Genre(rs.getInt("genre_id"), rs.getString("genre_name")), id);
+                (rs, rowNum) -> new Genre(rs.getLong("genre_id"), rs.getString("genre_name")), id);
         return genres.stream()
                 .findFirst()
                 .orElseThrow(() -> new ArgumentNotFoundException("Жанр с ID=" + id + " отсутствует в базе"));
     }
 
     // Получить все доступные жанры фильмов
+    @Override
     public List<Genre> getAllGenres() {
         String sqlSelectAll =
                 "SELECT * " +
                 "FROM genres " +
                 "ORDER BY genre_id ASC";
         return jdbcTemplate.query(sqlSelectAll,
-                (rs, rowNum) -> new Genre(rs.getInt("genre_id"), rs.getString("genre_name")));
+                (rs, rowNum) -> new Genre(rs.getLong("genre_id"), rs.getString("genre_name")));
     }
 
     // Сохранить переданные жанры фильма

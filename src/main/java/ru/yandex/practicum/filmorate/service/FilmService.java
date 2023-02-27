@@ -9,6 +9,9 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.database.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.MpaStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
 import java.util.List;
@@ -19,7 +22,7 @@ import java.util.TreeSet;
 @AllArgsConstructor
 @Slf4j
 @Getter
-public class FilmService implements FilmStorage {
+public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreStorage {
     private final FilmDbStorage filmStorage;
     private final UserService userService;
     private final FilmValidator filmValidator;
@@ -47,17 +50,20 @@ public class FilmService implements FilmStorage {
     }
 
     // Получить данные фильма по ID
+    @Override
     public Film getFilmById(Long filmId) {
         validateFilmId(filmId);
         return filmStorage.getFilmById(filmId);
     }
 
     // Получить список всех фильмов
+    @Override
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
     }
 
     // Поставить лайк фильму от пользователя
+    @Override
     public void addLike(Long filmId, Long userId) {
         validateFilmId(filmId);
         userService.validateUserId(userId);
@@ -65,6 +71,7 @@ public class FilmService implements FilmStorage {
     }
 
     // Удалить лайк фильму от пользователя
+    @Override
     public void deleteLike(Long filmId, Long userId) {
         validateFilmId(filmId);
         userService.validateUserId(userId);
@@ -77,21 +84,25 @@ public class FilmService implements FilmStorage {
     }
 
     // Получить MPA-рейтинг фильма по ID
-    public Mpa getMpaById(int id) {
+    @Override
+    public Mpa getMpaById(Long id) {
         return filmStorage.getMpaDbStorage().getMpaById(id);
     }
 
     // Получить список всех доступных MPA-рейтингов фильмов
+    @Override
     public List<Mpa> getAllMpa() {
         return filmStorage.getMpaDbStorage().getAllMpa();
     }
 
     // Получить жанр фильма по ID
-    public Genre getGenreById(int id) {
+    @Override
+    public Genre getGenreById(Long id) {
         return filmStorage.getGenreDbStorage().getGenreById(id);
     }
 
     // Получить все доступные жанры фильмов
+    @Override
     public List<Genre> getAllGenres() {
         return filmStorage.getGenreDbStorage().getAllGenres();
     }

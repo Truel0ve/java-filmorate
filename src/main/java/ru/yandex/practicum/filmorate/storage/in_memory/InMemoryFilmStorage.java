@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.LikeStorage;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
-public class InMemoryFilmStorage implements FilmStorage {
+public class InMemoryFilmStorage implements FilmStorage, LikeStorage {
     private final Map<Long, Film> films = new HashMap<>();
     private Long newId = 0L;
 
@@ -43,19 +43,23 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.info("Фильм \"" + film.getName() + "\" удален из базы.");
     }
 
-    public Map<Long, Film> getAllFilms() {
-        return films;
+    @Override
+    public List<Film> getAllFilms() {
+        return new ArrayList<>(films.values());
     }
 
+    @Override
     public Film getFilmById(Long filmId) {
         return films.get(filmId);
     }
 
+    @Override
     public void addLike(Long filmId, Long userId) {
         films.get(filmId).getLikes().add(userId);
         log.info("Пользователь с ID=" + userId + " поставил лайк фильму \"" + films.get(filmId).getName() + "\".");
     }
 
+    @Override
     public void deleteLike(Long filmId, Long userId) {
         films.get(filmId).getLikes().remove(userId);
         log.info("Пользователь с ID=" + userId + " убрал лайк фильму \"" + films.get(filmId).getName() + "\".");
