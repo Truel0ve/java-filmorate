@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,6 +68,13 @@ public class FilmController {
         return filmService.getPopularFilms().stream()
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilmsByFriends(@RequestParam("userId") Long userId,
+                                              @RequestParam("friendId") Long friendId) {
+        logRequestMethod(RequestMethod.GET, "/common?userId=" + userId + "&friendId=" + friendId);
+        return new ArrayList<>(filmService.getCommonFilmsByFriends(userId, friendId));
     }
 
     private void logRequestMethod(RequestMethod requestMethod) {
