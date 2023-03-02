@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,6 +71,11 @@ public class FilmController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/director/{directorId}")
+    public List<Film> getAllDirectorFilms(@PathVariable Long directorId, @RequestParam String sortBy) {
+        logRequestMethod(RequestMethod.GET, "/director/" + directorId + "?sortBy=" + sortBy);
+        return filmService.getDirectorsFilms(directorId, sortBy);
+    }
 
     private void logRequestMethod(RequestMethod requestMethod) {
         log.debug("Получен запрос " + requestMethod + " по адресу: /films");

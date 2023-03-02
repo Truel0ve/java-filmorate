@@ -4,19 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.database.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.LikeStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.*;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +22,7 @@ import java.util.stream.Collectors;
 public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreStorage {
     private final FilmDbStorage filmStorage;
     private final UserService userService;
+    private final DirectorService directorService;
     private final FilmValidator filmValidator;
 
     // Создать новый фильм
@@ -45,9 +42,9 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
 
     // Удалить фильм
     @Override
-    public void deleteFilm(Film film) {
-        validateFilmId(film.getId());
-        filmStorage.deleteFilm(film);
+    public void deleteFilm(Long filmId) {
+        validateFilmId(filmId);
+        filmStorage.deleteFilm(filmId);
     }
 
     // Получить данные фильма по ID
@@ -107,6 +104,27 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
                 .stream()
                 .filter(f->f.getReleaseDate().getYear() == year)
                 .collect(Collectors.toSet());
+    }
+
+    // Получить список всех фильмов режиссёра, отсортированных по годам или количеству лайков
+    public List<Film> getDirectorsFilms(Long directorId, String sortBy) {
+        List<Film> directorsFilms = directorService.getDirectorsFilms(directorId);
+        if (!directorsFilms.isEmpty()) {
+            switch (sortBy) {
+                case "year":
+                    return directorsFilms.stream()
+                            .sorted(Comparator.comparing(Film::getReleaseDate))
+                            .collect(Collectors.toList());
+                case "likes":
+                    return directorsFilms.stream()
+                            .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
+                            .collect(Collectors.toList());
+                default:
+                    throw new ArgumentNotFoundException("Неверный параметр запроса");
+            }
+        } else {
+            throw new ArgumentNotFoundException("В базе нет фильмов выбранного режиссёра");
+        }
     }
 
     // Получить MPA-рейтинг фильма по ID

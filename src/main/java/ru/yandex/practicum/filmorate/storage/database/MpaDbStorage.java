@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.database;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
@@ -12,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.interfaces.MpaStorage;
 import java.util.List;
 
 @Component
-@Primary
 @RequiredArgsConstructor
 @Slf4j
 public class MpaDbStorage implements MpaStorage {
