@@ -39,9 +39,9 @@ public class UserService implements UserStorage, FriendStorage {
 
     // Удалить пользователя
     @Override
-    public void deleteUser(User user) {
-        validateUserId(user.getId());
-        userStorage.deleteUser(user);
+    public void deleteUser(Long userId) {
+        validateUserId(userId);
+        userStorage.deleteUser(userId);
     }
 
     // Получить данные пользователя по ID

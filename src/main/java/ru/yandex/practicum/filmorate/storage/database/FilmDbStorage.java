@@ -18,7 +18,6 @@ import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @Primary
@@ -30,6 +29,7 @@ public class FilmDbStorage implements FilmStorage {
     private final LikeDbStorage likeDbStorage;
     private final MpaDbStorage mpaDbStorage;
     private final GenreDbStorage genreDbStorage;
+    private final DirectorDbStorage directorDbStorage;
 
     // Создать новый фильм
     @Override
@@ -50,14 +50,31 @@ public class FilmDbStorage implements FilmStorage {
             }, keyHolder);
             Long filmId = Objects.requireNonNull(keyHolder.getKey()).longValue();
             film.setId(filmId);
-            if (film.getGenres() != null) {
-                film.setGenres(genreDbStorage.setGenres(film));
-            }
+            setGenres(film);
+            setDirectors(film);
             log.info("Добавлен новый фильм \"" + film.getName() + "\".");
         } catch (DuplicateKeyException e) {
             throw new ValidationException("Фильм \"" + film.getName() + "\" уже есть в базе.");
         }
         return film;
+    }
+
+    // Задать фильму жанры
+    private void setGenres(Film film) {
+        if ((film.getGenres() != null)) {
+            film.setGenres(genreDbStorage.setGenres(film));
+        } else {
+            film.setGenres(new HashSet<>());
+        }
+    }
+
+    // Задать фильму режиссёров
+    private void setDirectors(Film film) {
+        if (film.getDirectors() != null) {
+            film.setDirectors(directorDbStorage.setDirectors(film));
+        } else {
+            film.setDirectors(new HashSet<>());
+        }
     }
 
     // Обновить данные фильма
@@ -69,29 +86,37 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE film_id = ?1";
         jdbcTemplate.update(sqlUpdateFilm, film.getId(), film.getName(), film.getDescription(), film.getReleaseDate(),
                 film.getDuration(), film.getMpa().getId());
-        if (film.getGenres() != null) {
-            String sqlDeleteGenres =
-                    "DELETE FROM genre_list " +
-                    "WHERE film_id = ?";
-            jdbcTemplate.update(sqlDeleteGenres, film.getId());
-            film.setGenres(genreDbStorage.setGenres(film));
-        }
+        String sqlDeleteGenres =
+                "DELETE FROM genre_list " +
+                "WHERE film_id = ?";
+        jdbcTemplate.update(sqlDeleteGenres, film.getId());
+        setGenres(film);
+        String sqlDeleteDirectors =
+                "DELETE FROM director_list " +
+                "WHERE film_id = ?";
+        jdbcTemplate.update(sqlDeleteDirectors, film.getId());
+        setDirectors(film);
         log.info("Внесены изменения в данные фильма \"" + film.getName() + "\".");
         return film;
     }
 
     // Удалить фильм
     @Override
-    public void deleteFilm(Film film) {
+    public void deleteFilm(Long filmId) {
+        String filmName = getFilmById(filmId).getName();
         String sqlDeleteFilm =
                 "DELETE FROM films " +
                 "WHERE film_id = ?";
-        jdbcTemplate.update(sqlDeleteFilm, film.getId());
+        jdbcTemplate.update(sqlDeleteFilm, filmId);
         String sqlDeleteGenres =
                 "DELETE FROM genre_list " +
                 "WHERE film_id = ?";
-        jdbcTemplate.update(sqlDeleteGenres, film.getId());
-        log.info("Фильм \"" + film.getName() + "\" удален из базы.");
+        jdbcTemplate.update(sqlDeleteGenres, filmId);
+        String sqlDeleteLikes =
+                "DELETE FROM like_list " +
+                "WHERE film_id = ?";
+        jdbcTemplate.update(sqlDeleteLikes, filmId);
+        log.info("Фильм \"" + filmName + "\" удален из базы.");
     }
 
     // Получить данные фильма по ID
@@ -101,11 +126,15 @@ public class FilmDbStorage implements FilmStorage {
                 "SELECT f.*, m.mpa_name, " +
                 "GROUP_CONCAT (DISTINCT g.genre_id ORDER BY g.genre_id SEPARATOR ',') AS genre_id, " +
                 "GROUP_CONCAT (DISTINCT g.genre_name ORDER BY g.genre_id SEPARATOR ',') AS genre_name, " +
-                "GROUP_CONCAT (DISTINCT ll.user_id ORDER BY ll.user_id SEPARATOR ',') AS likes " +
+                "GROUP_CONCAT (DISTINCT ll.user_id ORDER BY ll.user_id SEPARATOR ',') AS likes, " +
+                "GROUP_CONCAT (DISTINCT d.director_id ORDER BY d.director_id SEPARATOR ',') AS director_id, " +
+                "GROUP_CONCAT (DISTINCT d.director_name ORDER BY d.director_id SEPARATOR ',') AS director_name " +
                 "FROM films AS f " +
                 "LEFT JOIN mpa AS m ON m.mpa_id = f.mpa_id " +
                 "LEFT JOIN genre_list AS gl ON gl.film_id = f.film_id " +
                 "LEFT JOIN genres AS g ON g.genre_id = gl.genre_id " +
+                "LEFT JOIN director_list AS dl ON dl.film_id = f.film_id " +
+                "LEFT JOIN directors AS d ON d.director_id = dl.director_id " +
                 "LEFT JOIN like_list AS ll ON ll.film_id = f.film_id " +
                 "WHERE f.film_id = ?" +
                 "GROUP BY f.film_id";
@@ -122,14 +151,18 @@ public class FilmDbStorage implements FilmStorage {
                 "SELECT f.*, m.mpa_name, " +
                 "GROUP_CONCAT (DISTINCT g.genre_id ORDER BY g.genre_id SEPARATOR ',') AS genre_id, " +
                 "GROUP_CONCAT (DISTINCT g.genre_name ORDER BY g.genre_id SEPARATOR ',') AS genre_name, " +
-                "GROUP_CONCAT (DISTINCT ll.user_id ORDER BY ll.user_id SEPARATOR ',') AS likes " +
+                "GROUP_CONCAT (DISTINCT ll.user_id ORDER BY ll.user_id SEPARATOR ',') AS likes, " +
+                "GROUP_CONCAT (DISTINCT d.director_id ORDER BY d.director_id SEPARATOR ',') AS director_id, " +
+                "GROUP_CONCAT (DISTINCT d.director_name ORDER BY d.director_id SEPARATOR ',') AS director_name " +
                 "FROM films AS f " +
                 "LEFT JOIN mpa AS m ON m.mpa_id = f.mpa_id " +
                 "LEFT JOIN genre_list AS gl ON gl.film_id = f.film_id " +
                 "LEFT JOIN genres AS g ON g.genre_id = gl.genre_id " +
+                "LEFT JOIN director_list AS dl ON dl.film_id = f.film_id " +
+                "LEFT JOIN directors AS d ON d.director_id = dl.director_id " +
                 "LEFT JOIN like_list AS ll ON ll.film_id = f.film_id " +
                 "GROUP BY f.film_id " +
                 "ORDER BY f.film_id";
-        return jdbcTemplate.queryForStream(sqlSelectAllFilms, new FilmRowMapper()).collect(Collectors.toList());
+        return jdbcTemplate.query(sqlSelectAllFilms, new FilmRowMapper());
     }
 }
