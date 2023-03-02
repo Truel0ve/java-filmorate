@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.database.rowmappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
@@ -130,6 +131,6 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT JOIN like_list AS ll ON ll.film_id = f.film_id " +
                 "GROUP BY f.film_id " +
                 "ORDER BY f.film_id";
-        return jdbcTemplate.queryForStream(sqlSelectAllFilms, new FilmRowMapper()).collect(Collectors.toList());
+        return jdbcTemplate.query(sqlSelectAllFilms, new FilmRowMapper());
     }
 }

@@ -100,6 +100,6 @@ public class UserDbStorage implements UserStorage {
         String sqlSelectAll =
                 "SELECT * " +
                 "FROM users";
-        return jdbcTemplate.queryForStream(sqlSelectAll, new UserRowMapper()).collect(Collectors.toList());
+        return jdbcTemplate.query(sqlSelectAll, new UserRowMapper());
     }
 }

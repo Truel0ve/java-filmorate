@@ -135,7 +135,7 @@ class FilmControllerTest {
         Long userId = filmController.getFilmService().getUserService().createUser(user).getId();
         Long filmId = filmController.postFilm(film).getId();
         filmController.addLike(filmId, userId);
-        List<Film> films = filmController.getPopularFilms(1L);
+        List<Film> films = filmController.getPopularFilms(1L, null, null);
         assertEquals(1, films.size(), "Неверное количество фильмов в списке популярных.");
         assertEquals(film, films.get(0), "Фильм отсутствует в списке популярных.");
     }

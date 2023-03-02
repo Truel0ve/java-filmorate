@@ -52,7 +52,7 @@ DELETE FROM films;
 ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1;
 
 DELETE FROM genre_list;
-ALTER TABLE genre_list ALTER COLUMN data_id RESTART WITH 1;
+--ALTER TABLE genre_list ALTER COLUMN data_id RESTART WITH 1;
 
 DELETE FROM genres;
 ALTER TABLE genres ALTER COLUMN genre_id RESTART WITH 1;
@@ -61,10 +61,10 @@ DELETE FROM users;
 ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1;
 
 DELETE FROM friend_list;
-ALTER TABLE friend_list ALTER COLUMN data_id RESTART WITH 1;
+--ALTER TABLE friend_list ALTER COLUMN data_id RESTART WITH 1;
 
 DELETE FROM like_list;
-ALTER TABLE like_list ALTER COLUMN data_id RESTART WITH 1;
+--ALTER TABLE like_list ALTER COLUMN data_id RESTART WITH 1;
 
 INSERT INTO mpa (mpa_name) values('G'), ('PG'), ('PG-13'), ('R'), ('NC-17');
 

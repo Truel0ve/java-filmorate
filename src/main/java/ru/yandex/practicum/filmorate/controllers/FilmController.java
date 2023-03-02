@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,12 +63,15 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Long count) {
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Long count,
+                                      @RequestParam(required = false) Long genreId,
+                                      @RequestParam(required = false) Long year) {
         logRequestMethod(RequestMethod.GET, "/popular?count=" + count);
-        return filmService.getPopularFilms().stream()
+        return filmService.getPopularFilms(year, genreId).stream()
                 .limit(count)
                 .collect(Collectors.toList());
     }
+
 
     private void logRequestMethod(RequestMethod requestMethod) {
         log.debug("Получен запрос " + requestMethod + " по адресу: /films");
