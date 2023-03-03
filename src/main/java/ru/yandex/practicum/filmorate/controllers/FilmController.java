@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,6 +74,12 @@ public class FilmController {
     public List<Film> getAllDirectorFilms(@PathVariable Long directorId, @RequestParam String sortBy) {
         logRequestMethod(RequestMethod.GET, "/director/" + directorId + "?sortBy=" + sortBy);
         return filmService.getDirectorsFilms(directorId, sortBy);
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilmsByFriends(@RequestParam("userId") Long userId,
+                                              @RequestParam("friendId") Long friendId) {
+        logRequestMethod(RequestMethod.GET, "/common?userId=" + userId + "&friendId=" + friendId);
+        return new ArrayList<>(filmService.getCommonFilmsByFriends(userId, friendId));
     }
 
     private void logRequestMethod(RequestMethod requestMethod) {
