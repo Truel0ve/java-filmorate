@@ -4,18 +4,15 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.database.rowmappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
@@ -35,28 +32,24 @@ public class FilmDbStorage implements FilmStorage {
     // Создать новый фильм
     @Override
     public Film createFilm(Film film) {
-        try {
-            String sqlInsertFilm =
-                    "INSERT INTO films (name, description, release_date, duration, mpa_id)" +
-                    "VALUES (?, ?, ?, ?, ?)";
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbcTemplate.update(con -> {
-                PreparedStatement preparedStatement = con.prepareStatement(sqlInsertFilm, Statement.RETURN_GENERATED_KEYS);
-                preparedStatement.setString(1, film.getName());
-                preparedStatement.setString(2, film.getDescription());
-                preparedStatement.setObject(3, film.getReleaseDate());
-                preparedStatement.setInt(4, film.getDuration());
-                preparedStatement.setLong(5, film.getMpa().getId());
-                return preparedStatement;
-            }, keyHolder);
-            Long filmId = Objects.requireNonNull(keyHolder.getKey()).longValue();
-            film.setId(filmId);
-            setGenres(film);
-            setDirectors(film);
-            log.info("Добавлен новый фильм \"" + film.getName() + "\".");
-        } catch (DuplicateKeyException e) {
-            throw new ValidationException("Фильм \"" + film.getName() + "\" уже есть в базе.");
-        }
+        String sqlInsertFilm =
+                "INSERT INTO films (film_name, description, release_date, duration, mpa_id)" +
+                "VALUES (?, ?, ?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(con -> {
+            PreparedStatement preparedStatement = con.prepareStatement(sqlInsertFilm, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, film.getName());
+            preparedStatement.setString(2, film.getDescription());
+            preparedStatement.setObject(3, film.getReleaseDate());
+            preparedStatement.setInt(4, film.getDuration());
+            preparedStatement.setLong(5, film.getMpa().getId());
+            return preparedStatement;
+        }, keyHolder);
+        Long filmId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+        film.setId(filmId);
+        setGenres(film);
+        setDirectors(film);
+        log.info("Добавлен новый фильм \"" + film.getName() + "\".");
         return film;
     }
 
@@ -83,7 +76,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         String sqlUpdateFilm =
                 "UPDATE films " +
-                "SET name = ?2, description = ?3, release_date = ?4, duration = ?5, mpa_id = ?6 " +
+                "SET film_name = ?2, description = ?3, release_date = ?4, duration = ?5, mpa_id = ?6 " +
                 "WHERE film_id = ?1";
         jdbcTemplate.update(sqlUpdateFilm, film.getId(), film.getName(), film.getDescription(), film.getReleaseDate(),
                 film.getDuration(), film.getMpa().getId());

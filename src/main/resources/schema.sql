@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS mpa (
 
 CREATE TABLE IF NOT EXISTS films (
 	film_id 		BIGINT 			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	name 			VARCHAR(50) 	UNIQUE NOT NULL,
+	film_name 		VARCHAR(50) 	NOT NULL,
 	description 	VARCHAR(200) 	NOT NULL,
 	release_date 	DATE 			NOT NULL CHECK (release_date >= '1895-12-28'),
 	duration 		INTEGER 		NOT NULL CHECK (duration > 0),
