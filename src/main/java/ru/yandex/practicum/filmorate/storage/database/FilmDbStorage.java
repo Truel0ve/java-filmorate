@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.database.rowmappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;

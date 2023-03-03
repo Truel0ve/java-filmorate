@@ -63,9 +63,11 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Long count) {
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Long count,
+                                      @RequestParam(required = false) Long genreId,
+                                      @RequestParam(required = false) Long year) {
         logRequestMethod(RequestMethod.GET, "/popular?count=" + count);
-        return filmService.getPopularFilms().stream()
+        return filmService.getPopularFilms(year, genreId).stream()
                 .limit(count)
                 .collect(Collectors.toList());
     }
