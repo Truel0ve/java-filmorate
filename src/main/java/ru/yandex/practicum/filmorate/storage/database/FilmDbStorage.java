@@ -132,4 +132,25 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY f.film_id";
         return jdbcTemplate.queryForStream(sqlSelectAllFilms, new FilmRowMapper()).collect(Collectors.toList());
     }
+
+    public List<Film> getCommonFilmsByFriends(Long userId, Long friendId) {
+        String sqlCommonFilms = "SELECT f.*, m.mpa_name, " +
+                "GROUP_CONCAT (DISTINCT g.genre_id ORDER BY g.genre_id SEPARATOR ',') AS genre_id, " +
+                "GROUP_CONCAT (DISTINCT g.genre_name ORDER BY g.genre_id SEPARATOR ',') AS genre_name, " +
+                "GROUP_CONCAT (DISTINCT ll.user_id ORDER BY ll.user_id SEPARATOR ',') AS likes  " +
+                "FROM films AS f  " +
+                "LEFT JOIN mpa AS m ON m.mpa_id = f.mpa_id " +
+                "LEFT JOIN genre_list AS gl ON gl.film_id = f.film_id " +
+                "LEFT JOIN genres AS g ON g.genre_id = gl.genre_id " +
+                "LEFT JOIN like_list AS ll ON ll.film_id = f.film_id " +
+                "WHERE f.film_id IN (SELECT FILM_ID " +
+                "FROM LIKE_LIST ll  " +
+                "WHERE (USER_ID = ?) OR (USER_ID = ?) " +
+                "GROUP BY FILM_ID " +
+                "HAVING COUNT(USER_ID) > 1) " +
+                "GROUP BY f.film_id";
+
+        return jdbcTemplate.query(sqlCommonFilms,
+                new FilmRowMapper(), userId, friendId);
+    }
 }

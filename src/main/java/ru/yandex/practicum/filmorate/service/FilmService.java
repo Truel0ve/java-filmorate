@@ -113,4 +113,9 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
             throw new NullPointerException("ID фильма не задан или отсутствует в базе.");
         }
     }
+
+    //Получить список фильмов общих с другом
+    public Set<Film> getCommonFilmsByFriends(Long userId, Long friendId) {
+        return new TreeSet<>(filmStorage.getCommonFilmsByFriends(userId, friendId));
+    }
 }
