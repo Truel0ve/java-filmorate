@@ -29,7 +29,7 @@ class UserControllerTest {
     @BeforeEach
     void beforeEach() {
         for (User u : userController.getAllUsers()) {
-            userController.deleteUser(u);
+            userController.deleteUser(u.getId());
         }
     }
 
@@ -93,7 +93,7 @@ class UserControllerTest {
         userController.postUser(user);
         assertEquals(user, userController.getUserById(user.getId()),
                 "Пользователь не соответствует ожидаемому значению.");
-        userController.deleteUser(user);
+        userController.deleteUser(user.getId());
         assertThrows(ArgumentNotFoundException.class,
                 () -> userController.getUserById(user.getId()));
     }

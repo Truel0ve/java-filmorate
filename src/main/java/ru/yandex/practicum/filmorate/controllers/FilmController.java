@@ -44,10 +44,10 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
-    @DeleteMapping
-    public void deleteFilm(@Valid @RequestBody Film film) {
+    @DeleteMapping("/{id}")
+    public void deleteFilm(@PathVariable("id") Long filmId) {
         logRequestMethod(RequestMethod.DELETE);
-        filmService.deleteFilm(film);
+        filmService.deleteFilm(filmId);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -68,6 +68,12 @@ public class FilmController {
         return filmService.getPopularFilms().stream()
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getAllDirectorFilms(@PathVariable Long directorId, @RequestParam String sortBy) {
+        logRequestMethod(RequestMethod.GET, "/director/" + directorId + "?sortBy=" + sortBy);
+        return filmService.getDirectorsFilms(directorId, sortBy);
     }
 
     @GetMapping("/common")
