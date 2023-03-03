@@ -44,10 +44,10 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
-    @DeleteMapping
-    public void deleteFilm(@Valid @RequestBody Film film) {
+    @DeleteMapping("/{id}")
+    public void deleteFilm(@PathVariable("id") Long filmId) {
         logRequestMethod(RequestMethod.DELETE);
-        filmService.deleteFilm(film);
+        filmService.deleteFilm(filmId);
     }
 
     @PutMapping("/{id}/like/{userId}")
