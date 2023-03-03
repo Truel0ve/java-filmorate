@@ -83,15 +83,9 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
     public Set<Film> getPopularFilms(Long year, Long genreId) {
         Set<Film> sortedByLikes = new TreeSet<>(getAllFilms());
         if (year != null && genreId != null) {                                      // оба фильтра
-            return filterByGenre(sortedByLikes, genreId)
-                    .stream()
-                    .filter(f -> f.getReleaseDate().getYear() == year)
-                    .collect(Collectors.toSet());
+            return filterByGenre(filterByYear(sortedByLikes, year), genreId);
         } else if (year != null) {                                                  // по году
-            return sortedByLikes
-                    .stream()
-                    .filter(f -> f.getReleaseDate().getYear() == year)
-                    .collect(Collectors.toSet());
+            return filterByYear(sortedByLikes, year);
         } else if (genreId != null) {                                               // по жанру
             return filterByGenre(sortedByLikes, genreId);
         } else return sortedByLikes;                                                //без фильтра
@@ -104,6 +98,14 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
                 .filter(f -> f.getGenres()
                         .stream()
                         .anyMatch(g -> g.getId().equals(genreId)))
+                .collect(Collectors.toSet());
+    }
+
+    // Фильтрация по году
+    private Set<Film> filterByYear(Set<Film> films, long year) {
+        return films
+                .stream()
+                .filter(f->f.getReleaseDate().getYear() == year)
                 .collect(Collectors.toSet());
     }
 
