@@ -57,7 +57,10 @@ CREATE TABLE IF NOT EXISTS reviews (
 	user_id			BIGINT			REFERENCES users (user_id) ON DELETE CASCADE,
 	film_id			BIGINT			REFERENCES films (film_id) ON DELETE CASCADE,
 	content			VARCHAR(200) 	NOT NULL,
+	is_positive     BOOLEAN         NOT NULL,
 	rating			BIGINT			DEFAULT 0
+
+
 );
 
 CREATE TABLE IF NOT EXISTS review_like_list (

@@ -164,20 +164,54 @@ public class FilmDbStorage implements FilmStorage {
         String sqlCommonFilms = "SELECT f.*, m.mpa_name, " +
                 "GROUP_CONCAT (DISTINCT g.genre_id ORDER BY g.genre_id SEPARATOR ',') AS genre_id, " +
                 "GROUP_CONCAT (DISTINCT g.genre_name ORDER BY g.genre_id SEPARATOR ',') AS genre_name, " +
-                "GROUP_CONCAT (DISTINCT ll.user_id ORDER BY ll.user_id SEPARATOR ',') AS likes  " +
-                "FROM films AS f  " +
+                "GROUP_CONCAT (DISTINCT ll.user_id ORDER BY ll.user_id SEPARATOR ',') AS likes, " +
+                "GROUP_CONCAT (DISTINCT d.director_id ORDER BY d.director_id SEPARATOR ',') AS director_id, " +
+                "GROUP_CONCAT (DISTINCT d.director_name ORDER BY d.director_id SEPARATOR ',') AS director_name " +
+                "FROM films AS f " +
                 "LEFT JOIN mpa AS m ON m.mpa_id = f.mpa_id " +
                 "LEFT JOIN genre_list AS gl ON gl.film_id = f.film_id " +
                 "LEFT JOIN genres AS g ON g.genre_id = gl.genre_id " +
+                "LEFT JOIN director_list AS dl ON dl.film_id = f.film_id " +
+                "LEFT JOIN directors AS d ON d.director_id = dl.director_id " +
                 "LEFT JOIN like_list AS ll ON ll.film_id = f.film_id " +
                 "WHERE f.film_id IN (SELECT FILM_ID " +
                 "FROM LIKE_LIST ll  " +
                 "WHERE (USER_ID = ?) OR (USER_ID = ?) " +
                 "GROUP BY FILM_ID " +
                 "HAVING COUNT(USER_ID) > 1) " +
-                "GROUP BY f.film_id";
-
+                "GROUP BY f.film_id " +
+                "ORDER BY f.film_id";
         return jdbcTemplate.query(sqlCommonFilms,
                 new FilmRowMapper(), userId, friendId);
+    }
+
+    public List<Film> getRecommendations(Long userId) {
+        String sqlCommonFilms = "SELECT f.*, m.mpa_name, " +
+                "GROUP_CONCAT (DISTINCT g.genre_id ORDER BY g.genre_id SEPARATOR ',') AS genre_id, " +
+                "GROUP_CONCAT (DISTINCT g.genre_name ORDER BY g.genre_id SEPARATOR ',') AS genre_name, " +
+                "GROUP_CONCAT (DISTINCT ll.user_id ORDER BY ll.user_id SEPARATOR ',') AS likes, " +
+                "GROUP_CONCAT (DISTINCT d.director_id ORDER BY d.director_id SEPARATOR ',') AS director_id, " +
+                "GROUP_CONCAT (DISTINCT d.director_name ORDER BY d.director_id SEPARATOR ',') AS director_name " +
+                "FROM films AS f " +
+                "LEFT JOIN mpa AS m ON m.mpa_id = f.mpa_id " +
+                "LEFT JOIN genre_list AS gl ON gl.film_id = f.film_id " +
+                "LEFT JOIN genres AS g ON g.genre_id = gl.genre_id " +
+                "LEFT JOIN director_list AS dl ON dl.film_id = f.film_id " +
+                "LEFT JOIN directors AS d ON d.director_id = dl.director_id " +
+                "LEFT JOIN like_list AS ll ON ll.film_id = f.film_id " +
+                "WHERE f.film_id IN (SELECT DISTINCT FILM_ID " +
+                "FROM LIKE_LIST ll " +
+                "WHERE USER_ID IN (SELECT ll2.USER_ID " +
+                "FROM LIKE_LIST ll " +
+                "INNER JOIN LIKE_LIST ll2 ON ll.FILM_ID = ll.FILM_ID " +
+                "WHERE ll.USER_ID = ? AND ll2.USER_ID != ? AND ll.FILM_ID = ll2.FILM_ID " +
+                "GROUP BY ll2.USER_ID " +
+                "ORDER BY COUNT(ll2.USER_ID) DESC ) AND FILM_ID NOT IN (SELECT FILM_ID \n" +
+                "FROM LIKE_LIST ll " +
+                "WHERE USER_ID = ?)) " +
+                "GROUP BY f.film_id " +
+                "ORDER BY f.film_id";
+        return jdbcTemplate.query(sqlCommonFilms,
+                new FilmRowMapper(), userId, userId, userId);
     }
 }
