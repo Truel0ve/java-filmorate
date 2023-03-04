@@ -57,7 +57,10 @@ CREATE TABLE IF NOT EXISTS reviews (
 	user_id			BIGINT			REFERENCES users (user_id) ON DELETE CASCADE,
 	film_id			BIGINT			REFERENCES films (film_id) ON DELETE CASCADE,
 	content			VARCHAR(200) 	NOT NULL,
+	is_positive     BOOLEAN         NOT NULL,
 	rating			BIGINT			DEFAULT 0
+
+
 );
 
 CREATE TABLE IF NOT EXISTS review_like_list (
@@ -82,8 +85,7 @@ CREATE TABLE IF NOT EXISTS events (
 	entity_id		BIGINT			,
 	timestamp		TIMESTAMP 		NOT NULL,
 	event_type		VARCHAR(20)		REFERENCES event_types (event_type) ON DELETE CASCADE,
-	operation		VARCHAR(20)		REFERENCES operations (operation) ON DELETE CASCADE,
-	FOREIGN KEY (entity_id) REFERENCES films (film_id) ON DELETE CASCADE,
+	operation		VARCHAR(20)		REFERENCES operations (operation) ON DELETE CASCADE,	FOREIGN KEY (entity_id) REFERENCES films (film_id) ON DELETE CASCADE,
   	FOREIGN KEY (entity_id) REFERENCES users (user_id) ON DELETE CASCADE,
   	FOREIGN KEY (entity_id) REFERENCES reviews (review_id) ON DELETE CASCADE
 );
