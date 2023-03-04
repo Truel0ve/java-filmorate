@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.database.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.LikeStorage;
@@ -68,6 +69,7 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
         validateFilmId(filmId);
         userService.validateUserId(userId);
         filmStorage.getLikeDbStorage().addLike(filmId, userId);
+        userService.getUserStorage().getEventDbStorage().addEvent(userId, filmId, "LIKE", "ADD");
     }
 
     // Удалить лайк фильму от пользователя
@@ -76,6 +78,7 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
         validateFilmId(filmId);
         userService.validateUserId(userId);
         filmStorage.getLikeDbStorage().deleteLike(filmId, userId);
+        userService.getUserStorage().getEventDbStorage().addEvent(userId, filmId, "LIKE", "REMOVE");
     }
 
     // Отсортировать список всех фильмов по убыванию от наиболее популярных к наименее популярным по количеству лайков

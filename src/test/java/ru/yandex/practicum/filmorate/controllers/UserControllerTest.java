@@ -8,9 +8,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -136,5 +138,35 @@ class UserControllerTest {
                 "Друг не удален из списка пользователя " + user.getLogin());
         assertFalse(userController.getFriendList(friendId).contains(user),
                 "Друг не удален из списка пользователя " + newFriend.getLogin());
+    }
+
+    @Test
+    void shouldCheckGetEvents() {
+        User newUser = User.builder()
+                .email("lier@yandex.ru")
+                .login("Lier")
+                .name("Vladimir")
+                .birthday(LocalDate.of(1990, 12, 8))
+                .build();
+        User newUser2 = User.builder()
+                .email("stranger@yandex.ru")
+                .login("Stranger")
+                .name("Shadow")
+                .birthday(LocalDate.of(1970, 5, 15))
+                .build();
+        User newUser3 = User.builder()
+                .email("gggg@mail.ru")
+                .login("Putnik")
+                .name("Гриша")
+                .birthday(LocalDate.of(1973, 10, 13))
+                .build();
+        userController.postUser(newUser);
+        userController.postUser(newUser2);
+        userController.postUser(newUser3);
+        userController.addFriend(newUser.getId(), newUser2.getId());
+        userController.addFriend(newUser2.getId(), newUser3.getId());
+
+        List<Event> event = userController.getEvents(newUser.getId());
+        assertEquals(event.get(0).getEventType(), "FRIEND");
     }
 }
