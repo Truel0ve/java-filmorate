@@ -156,6 +156,11 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
         return new TreeSet<>(filmStorage.getCommonFilmsByFriends(userId, friendId));
     }
 
+    //Получить список рекомендованных фильмов для ID пользователя
+    public List<Film> getRecommendations(Long userId) {
+        return filmStorage.getRecommendations(userId);
+    }
+
     // Проверить корректность передаваемого ID фильма
     private void validateFilmId(Long filmId) {
         if (filmId == null || filmStorage.getFilmById(filmId) == null) {
