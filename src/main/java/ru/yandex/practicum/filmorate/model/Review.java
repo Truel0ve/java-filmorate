@@ -10,7 +10,7 @@ import javax.validation.constraints.Positive;
 @Data
 @Builder
 public class Review {
-    private Long id;
+    private Long reviewId;
     @NotBlank
     private String content;
     @NotNull

@@ -26,22 +26,23 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Review createReview(Review review) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String sqlQuery = "INSERT INTO REVIEWS (USER_ID, FILM_ID, CONTENT) " +
-                "VALUES (?,?,?) ";
+        String sqlQuery = "INSERT INTO REVIEWS (USER_ID, FILM_ID, CONTENT, IS_POSITIVE) " +
+                "VALUES (?,?,?,?) ";
         jdbcTemplate.update(con -> {
             PreparedStatement stmt = con.prepareStatement(sqlQuery, new String[]{"REVIEW_ID"});
             stmt.setLong(1, review.getUserId());
             stmt.setLong(2, review.getFilmId());
             stmt.setString(3, review.getContent());
+            stmt.setBoolean(4, review.getIsPositive());
 
             return stmt;
         }, keyHolder);
 
         Long newReviewId = keyHolder.getKey().longValue();
-        review.setId(newReviewId);
+        review.setReviewId(newReviewId);
 
         log.info("Добавлен новый отзыв с id={} к фильму с id={} пользователем с id={}",
-                review.getId(), review.getFilmId(), review.getUserId());
+                review.getReviewId(), review.getFilmId(), review.getUserId());
 
         return review;
     }
@@ -49,16 +50,17 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Review updateReview(Review review) {
         String sqlQuery = "UPDATE REVIEWS " +
-                "SET USER_ID=?, FILM_ID=?, CONTENT=? " +
+                "SET USER_ID=?, FILM_ID=?, CONTENT=?, IS_POSITIVE=? " +
                 "WHERE REVIEW_ID=?";
         jdbcTemplate.update(sqlQuery,
                 review.getUserId(),
                 review.getFilmId(),
                 review.getContent(),
-                review.getId());
+                review.getIsPositive(),
+                review.getReviewId());
 
         log.info("Обновлен отзыв с id={} к фильму с id={} от пользователя с id={}",
-                review.getId(), review.getFilmId(), review.getUserId());
+                review.getReviewId(), review.getFilmId(), review.getUserId());
 
         return review;
     }
@@ -74,7 +76,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review getReviewById(Long reviewId) throws ArgumentNotFoundException {
-        String sqlQuery = "SELECT REVIEW_ID, USER_ID, FILM_ID, CONTENT " +
+        String sqlQuery = "SELECT * " +
                 "FROM REVIEWS " +
                 "WHERE REVIEW_ID=?";
         List<Review> reviews = jdbcTemplate.query(sqlQuery, ReviewDbStorage::makeReview, reviewId);
@@ -89,7 +91,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public List<Review> getAllReviewsFromFilm(Long filmId, Long count) throws ArgumentNotFoundException {
-        String sqlQuery = "SELECT REVIEW_ID, USER_ID, FILM_ID, CONTENT " +
+        String sqlQuery = "SELECT * " +
                 "FROM REVIEWS " +
                 "WHERE FILM_ID=?";
         List<Review> reviews = jdbcTemplate.query(sqlQuery, ReviewDbStorage::makeReview, filmId);
@@ -102,17 +104,35 @@ public class ReviewDbStorage implements ReviewStorage {
         return reviews;
     }
 
+    @Override
+    public List<Review> getAllReviews() {
+        String sqlQuery = "SELECT * " +
+                "FROM REVIEWS ";
+        List<Review> reviews = jdbcTemplate.query(sqlQuery, ReviewDbStorage::makeReview);
+        if (reviews.size() == 0) {
+            log.warn("Отзывы не найден в БД!");
+            throw new ArgumentNotFoundException("Отзывы не найдены");
+        }
+        log.info("Получены все отзывы. Отзывы отсортированы по полезности (DESC)");
+
+        return reviews;
+    }
+
     public static Review makeReview(ResultSet rs, int rowNum) throws SQLException {
         Long id = rs.getLong("REVIEW_ID");
         String content = rs.getString("CONTENT");
+        Boolean isPositive = rs.getBoolean("IS_POSITIVE");
         Long userId = rs.getLong("USER_ID");
         Long filmId = rs.getLong("FILM_ID");
+        Long useful = 0L;
 
         return Review.builder()
-                .id(id)
+                .reviewId(id)
                 .content(content)
+                .isPositive(isPositive)
                 .userId(userId)
                 .filmId(filmId)
+                .useful(useful)
                 .build();
     }
 

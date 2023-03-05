@@ -33,7 +33,7 @@ public class ReviewService implements ReviewStorage, ReviewLikeStorage {
     @Override
     public Review createReview(Review review) {
         reviewValidator.validate(review); //Проверка переменных экземпляра класса Review
-        checkReviewInDb(review.getId()); //Проверка наличия отзыва в БД по его id
+        //checkReviewInDb(review.getId()); //Проверка наличия отзыва в БД по его id
 
         return reviewDbStorage.createReview(review);
     }
@@ -41,7 +41,7 @@ public class ReviewService implements ReviewStorage, ReviewLikeStorage {
     @Override
     public Review updateReview(Review review) {
         reviewValidator.validate(review);
-        checkReviewInDb(review.getId());
+        checkReviewInDb(review.getReviewId());
 
         return reviewDbStorage.updateReview(review);
     }
@@ -64,13 +64,23 @@ public class ReviewService implements ReviewStorage, ReviewLikeStorage {
 
     @Override
     public List<Review> getAllReviewsFromFilm(Long filmId, Long count) {
-        checkFilmInDb(filmId);
 
         return reviewDbStorage.getAllReviewsFromFilm(filmId, count)
                 .stream()
-                .peek(review -> review.setUseful(reviewLikeDbStorage.getUseful(review.getId())))
+                .peek(review -> review.setUseful(reviewLikeDbStorage.getUseful(review.getReviewId())))
                 .sorted(Comparator.comparing(Review::getUseful).reversed())
                 .limit(count)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Review> getAllReviews() {
+
+        return reviewDbStorage.getAllReviews()
+                .stream()
+                .peek(review -> review.setUseful(reviewLikeDbStorage.getUseful(review.getReviewId())))
+                .sorted(Comparator.comparing(Review::getUseful).reversed())
+                .limit(10)
                 .collect(Collectors.toList());
     }
 
