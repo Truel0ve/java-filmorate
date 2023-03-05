@@ -33,13 +33,14 @@ public class ReviewService implements ReviewStorage, ReviewLikeStorage {
     @Override
     public Review createReview(Review review) {
         reviewValidator.validate(review); //Проверка переменных экземпляра класса Review
-        //TODO. Необходима реализация проверки "есть ли уже такой отзыв в БД"
+        checkReviewInDb(review.getId()); //Проверка наличия отзыва в БД по его id
+
         return reviewDbStorage.createReview(review);
     }
 
     @Override
     public Review updateReview(Review review) {
-        reviewValidator.validate(review); //Проверка переменных экземпляра класса Review
+        reviewValidator.validate(review);
         checkReviewInDb(review.getId());
 
         return reviewDbStorage.updateReview(review);
@@ -49,8 +50,6 @@ public class ReviewService implements ReviewStorage, ReviewLikeStorage {
     public void deleteReview(Long reviewId) {
         checkReviewInDb(reviewId);
         reviewDbStorage.deleteReview(reviewId);
-        //TODO. Требуется ли удаление всех файлков и дизлайков, если удален отзыв?
-        // Проверить, есть ли в таблице каскадное удаление лайков и дизлайков по review_id
     }
 
     @Override

@@ -20,6 +20,7 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
         String sqlQuery = "INSERT INTO REVIEW_LIKE_LIST (REVIEW_ID, USER_ID, IS_LIKE, USEFUL) " +
                 "VALUES (?,?,?,?)";
         jdbcTemplate.update(sqlQuery, reviewId, userId, isLike, useful);
+        log.info("Поставлен лайк к отзыву с id={} пользователем с id={}", reviewId, userId);
     }
 
     @Override
@@ -27,16 +28,18 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
         String sqlQuery = "DELETE FROM REVIEW_LIKE_LIST " +
                 "WHERE REVIEW_ID=? AND USER_ID=? AND IS_LIKE=?";
         jdbcTemplate.update(sqlQuery, reviewId, userId, isLike);
+        log.info("Удален лайк к отзыву с id={} пользователем с id={}", reviewId, userId);
     }
 
     @Override
     public void addDislike(Long reviewId, Long userId, Boolean isLike) {
         //Переменная like вставляется в поле useful. Если лайк, то +1, если дизлайк, то -1
         //Рейтинг считаем, суммируя значения по полю useful
-        Integer useful = 1;
+        Integer useful = -1;
         String sqlQuery = "INSERT INTO REVIEW_LIKE_LIST (REVIEW_ID, USER_ID, IS_LIKE, USEFUL) " +
                 "VALUES (?,?,?,?)";
         jdbcTemplate.update(sqlQuery, reviewId, userId, isLike, useful);
+        log.info("Поставлен дизлайк к отзыву с id={} пользователем с id={}", reviewId, userId);
     }
 
     @Override
@@ -44,6 +47,7 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
         String sqlQuery = "DELETE FROM REVIEW_LIKE_LIST " +
                 "WHERE REVIEW_ID=? AND USER_ID=? AND IS_LIKE=?";
         jdbcTemplate.update(sqlQuery, reviewId, userId, isLike);
+        log.info("Удален дизлайк к отзыву с id={} пользователем с id={}", reviewId, userId);
     }
 
     public Long getUseful(Long reviewId) {
@@ -52,6 +56,7 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
                 "WHERE REVIEW_ID=?";
         Long useful = jdbcTemplate.queryForObject(sqlQuery, Long.class, reviewId);
 
+        log.info("Получен рейтинг полезности к отзыву с id={}", reviewId);
         return useful;
     }
 

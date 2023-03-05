@@ -79,8 +79,10 @@ public class ReviewDbStorage implements ReviewStorage {
                 "WHERE REVIEW_ID=?";
         List<Review> reviews = jdbcTemplate.query(sqlQuery, ReviewDbStorage::makeReview, reviewId);
         if (reviews.size() < 1) {
+            log.warn("Отзыв с id={} не найден в БД!", reviewId);
             throw new ArgumentNotFoundException("Отзыв с id=" + reviewId + " не найден в БД.");
         }
+        log.info("Получен отзыв с id={}", reviewId);
 
         return reviews.get(0);
     }
@@ -92,8 +94,11 @@ public class ReviewDbStorage implements ReviewStorage {
                 "WHERE FILM_ID=?";
         List<Review> reviews = jdbcTemplate.query(sqlQuery, ReviewDbStorage::makeReview, filmId);
         if (reviews.size() == 0) {
+            log.warn("Отзывы к фильму с id={} не найден в БД!", filmId);
             throw new ArgumentNotFoundException("Отзывы к фильму с id=" + filmId + " не найдены");
         }
+        log.info("Получены все отзывы к фильму с id={}. Отзывы отсортированы по полезности (DESC)", filmId);
+
         return reviews;
     }
 
