@@ -40,10 +40,10 @@ public class UserController {
         return userService.updateUser(user);
     }
 
-    @DeleteMapping
-    public void deleteUser(@Valid @RequestBody User user) {
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable("id") Long userId) {
         logRequestMethod(RequestMethod.DELETE);
-        userService.deleteUser(user);
+        userService.deleteUser(userId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")

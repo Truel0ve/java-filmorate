@@ -35,7 +35,7 @@ class FilmControllerTest {
     @BeforeEach
     void beforeEach() {
         for (Film f : filmController.getAllFilms()) {
-            filmController.deleteFilm(f);
+            filmController.deleteFilm(f.getId());
         }
     }
 
@@ -102,7 +102,7 @@ class FilmControllerTest {
         filmController.postFilm(film);
         assertEquals(film, filmController.getFilmById(film.getId()),
                 "Фильм не соответствует ожидаемому значению.");
-        filmController.deleteFilm(film);
+        filmController.deleteFilm(film.getId());
         assertThrows(ArgumentNotFoundException.class,
                 () -> filmController.getFilmById(film.getId()));
     }
@@ -121,7 +121,7 @@ class FilmControllerTest {
         assertTrue(filmController.getFilmById(filmId).getLikes().contains(userId), "Лайк пользователя не добавлен.");
         filmController.deleteLike(filmId, userId);
         assertFalse(filmController.getFilmById(filmId).getLikes().contains(userId), "Лайк пользователя не удален.");
-        filmController.getFilmService().getUserService().deleteUser(user);
+        filmController.getFilmService().getUserService().deleteUser(user.getId());
     }
 
     @Test
@@ -135,7 +135,7 @@ class FilmControllerTest {
         Long userId = filmController.getFilmService().getUserService().createUser(user).getId();
         Long filmId = filmController.postFilm(film).getId();
         filmController.addLike(filmId, userId);
-        List<Film> films = filmController.getPopularFilms(1L);
+        List<Film> films = filmController.getPopularFilms(1L, null, null);
         assertEquals(1, films.size(), "Неверное количество фильмов в списке популярных.");
         assertEquals(film, films.get(0), "Фильм отсутствует в списке популярных.");
     }

@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,10 +44,10 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
-    @DeleteMapping
-    public void deleteFilm(@Valid @RequestBody Film film) {
+    @DeleteMapping("/{id}")
+    public void deleteFilm(@PathVariable("id") Long filmId) {
         logRequestMethod(RequestMethod.DELETE);
-        filmService.deleteFilm(film);
+        filmService.deleteFilm(filmId);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -62,11 +63,26 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Long count) {
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Long count,
+                                      @RequestParam(required = false) Long genreId,
+                                      @RequestParam(required = false) Long year) {
         logRequestMethod(RequestMethod.GET, "/popular?count=" + count);
-        return filmService.getPopularFilms().stream()
+        return filmService.getPopularFilms(year, genreId).stream()
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getAllDirectorFilms(@PathVariable Long directorId, @RequestParam String sortBy) {
+        logRequestMethod(RequestMethod.GET, "/director/" + directorId + "?sortBy=" + sortBy);
+        return filmService.getDirectorsFilms(directorId, sortBy);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilmsByFriends(@RequestParam("userId") Long userId,
+                                              @RequestParam("friendId") Long friendId) {
+        logRequestMethod(RequestMethod.GET, "/common?userId=" + userId + "&friendId=" + friendId);
+        return new ArrayList<>(filmService.getCommonFilmsByFriends(userId, friendId));
     }
 
     private void logRequestMethod(RequestMethod requestMethod) {
