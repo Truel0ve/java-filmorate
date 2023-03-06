@@ -12,7 +12,7 @@
 
 **ER-диаграмма базы данных приложения имеет следующую структуру:**
 
-![Filmorate Database](https://github.com/Truel0ve/java-filmorate/blob/add-database/Filmorate%20Database.png)
+![Filmorate Database](Filmorate Database.png)
 
 **Примеры запросов:**
 
