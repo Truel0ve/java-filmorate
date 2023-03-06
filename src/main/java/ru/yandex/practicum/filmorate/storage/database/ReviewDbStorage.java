@@ -49,6 +49,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void updateReview(Review review) {
+        //Обновить можно только содержание отзыва (content) и его характер (is_positive)
         String sqlQuery = "UPDATE REVIEWS " +
                 "SET CONTENT=?, IS_POSITIVE=? " +
                 "WHERE REVIEW_ID=?";

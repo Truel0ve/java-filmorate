@@ -65,6 +65,7 @@ public class ReviewService {
         return reviewDbStorage.getAllReviews()
                 .stream()
                 //Для каждого экземпляра класса Review обновляем поле useful через сеттер
+                //Для модификации объектов использую stream.peek()
                 .peek(review -> review.setUseful(getUsefulFromDb(review.getReviewId())))
                 .sorted(Comparator.comparing(Review::getUseful).reversed()) //Сортируем по убываю по полю useful
                 .limit(count)
