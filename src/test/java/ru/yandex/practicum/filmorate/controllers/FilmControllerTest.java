@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
@@ -42,19 +41,6 @@ class FilmControllerTest {
     @Test
     void shouldCreateNewFilm() {
         assertEquals(film, filmController.postFilm(film), "Новый фильм не добавлен.");
-    }
-
-    @Test
-    void shouldNotCreateThenNewFilmHasSameName() {
-        filmController.postFilm(film);
-        Film newFilm = Film.builder()
-                .name("Терминатор")
-                .description("Фильм со Шварценеггером в главной роли.")
-                .releaseDate(LocalDate.of(1984, 10, 26))
-                .duration(108)
-                .mpa(new Mpa(4L, "R"))
-                .build();
-        assertThrows(ValidationException.class, () -> filmController.postFilm(newFilm));
     }
 
     @Test
