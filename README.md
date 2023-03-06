@@ -12,7 +12,7 @@
 
 **ER-диаграмма базы данных приложения имеет следующую структуру:**
 
-<img alt="Filmorate Database" src="Filmorate Database.png" width="800"/>
+<img alt="Filmorate Database" src="./Filmorate Database.png" width="800"/>
 
 **Примеры запросов:**
 
