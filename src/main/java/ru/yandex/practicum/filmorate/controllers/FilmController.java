@@ -88,6 +88,7 @@ public class FilmController {
     @GetMapping("/search")
     public List<Film> searchFilm(@RequestParam(required = false) String query,
                                  @RequestParam(required = false) List<String> by) {
+        logRequestMethod(RequestMethod.GET, "/search с параметрами 'query=" + query + "', 'by=" + by + "'");
         String director = null;
         String title = null;
         if (by.contains("director")) director = "director";
