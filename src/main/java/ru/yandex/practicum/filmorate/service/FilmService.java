@@ -9,10 +9,16 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.database.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.*;
+import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.MpaStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Service
@@ -166,5 +172,40 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
         if (filmId == null || filmStorage.getFilmById(filmId) == null) {
             throw new NullPointerException("ID фильма не задан или отсутствует в базе.");
         }
+    }
+
+    // Поиск фильмов по подстроке с опциональными параметрами поиска по названию и режиссёру
+    public Set<Film> searchFilm(String query, String director, String title) {
+        Set<Film> sortedFilms = new TreeSet<>(getAllFilms());
+        Set<Film> result = new TreeSet<>();
+        if (director != null && title != null) {
+            result.addAll(searchFilmByName(sortedFilms, query));
+            result.addAll(searchFilmByDirector(sortedFilms, query));
+            return result;
+        } else if (director != null) {
+            result.addAll(searchFilmByDirector(sortedFilms, query));
+            return result;
+        } else if (title != null) {
+            result.addAll(searchFilmByName(sortedFilms, query));
+            return result;
+        } else return sortedFilms;
+    }
+
+    // Поиск фильмов по названию
+    private Set<Film> searchFilmByName(Set<Film> films, String query) {
+        return films
+                .stream()
+                .filter(f -> f.getName().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toSet());
+    }
+
+    // Поиск фильмов по режиссёру
+    private Set<Film> searchFilmByDirector(Set<Film> films, String query) {
+        return films
+                .stream()
+                .filter(f -> f.getDirectors()
+                        .stream()
+                        .anyMatch(d -> d.getName().toLowerCase().contains(query.toLowerCase())))
+                .collect(Collectors.toSet());
     }
 }
