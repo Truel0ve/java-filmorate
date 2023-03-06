@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -44,17 +43,15 @@ public class ReviewController {
     @GetMapping
     public List<Review> getAllReviews(@RequestParam(required = false, name = "filmId") Long filmId,
                                       @RequestParam(name = "count", defaultValue = "10") Long count) {
-        log.debug("Получен запрос " + RequestMethod.GET + " по адресу: /reviews?filmId=" +
-                filmId +"&count={count}" + count);
-
-        List<Review> reviews = new ArrayList<>();
 
         if (filmId == null) {
-            reviews = reviewService.getAllReviews();
-        } else {
-            reviews = reviewService.getAllReviewsFromFilm(filmId, count);
+            log.debug("Получен запрос " + RequestMethod.GET + " по адресу: /reviews");
+            return reviewService.getAllReviews(count);
         }
-        return reviews;
+
+        log.debug("Получен запрос " + RequestMethod.GET + " по адресу: /reviews?filmId=" +
+                filmId + "&count={count}" + count);
+        return reviewService.getAllReviewsForFilm(filmId, count);
     }
 
     @PutMapping("/{id}/like/{userId}")

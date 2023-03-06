@@ -11,10 +11,9 @@ import ru.yandex.practicum.filmorate.storage.database.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.database.ReviewDbStorage;
 import ru.yandex.practicum.filmorate.storage.database.ReviewLikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.ReviewLikeStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.ReviewStorage;
 import ru.yandex.practicum.filmorate.validators.ReviewValidator;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -23,95 +22,94 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ReviewService implements ReviewStorage, ReviewLikeStorage {
+public class ReviewService {
     private final ReviewDbStorage reviewDbStorage;
     private final ReviewLikeDbStorage reviewLikeDbStorage;
     private final ReviewValidator reviewValidator;
     private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
 
-    @Override
+    //Поместить отзыв в БД
     public Review createReview(Review review) {
         reviewValidator.validate(review); //Проверка переменных экземпляра класса Review
-        //checkReviewInDb(review.getId()); //Проверка наличия отзыва в БД по его id
 
         return reviewDbStorage.createReview(review);
     }
 
-    @Override
+    //Обновить отзыв в БД
     public Review updateReview(Review review) {
         reviewValidator.validate(review);
-        checkReviewInDb(review.getReviewId());
+        checkReviewInDb(review.getReviewId()); //Проверка наличия отзыва в БД по его id
+        reviewDbStorage.updateReview(review);
 
-        return reviewDbStorage.updateReview(review);
+        return getReviewById(review.getReviewId());
     }
 
-    @Override
+    //Удалить отзыв из БД по его id
     public void deleteReview(Long reviewId) {
         checkReviewInDb(reviewId);
         reviewDbStorage.deleteReview(reviewId);
     }
 
-    @Override
+    //Получить отзыв из БД по его id
     public Review getReviewById(Long reviewId) {
         checkReviewInDb(reviewId);
-        Review review = reviewDbStorage.getReviewById(reviewId);
-        Long rating = reviewLikeDbStorage.getUseful(reviewId);
-        review.setUseful(rating);
+        Review review = reviewDbStorage.getReviewById(reviewId); //Сначала получаем экземпляр класса
+        review.setUseful(getUsefulFromDb(reviewId)); //Затем обновляем переменную экземпляра через сеттер
 
         return review;
     }
 
-    @Override
-    public List<Review> getAllReviewsFromFilm(Long filmId, Long count) {
-
-        return reviewDbStorage.getAllReviewsFromFilm(filmId, count)
+    //Получить все отзывы ко всем фильмам, если указан count - выборку ограничить соответствующим значением
+    public List<Review> getAllReviews(Long count) {
+        return reviewDbStorage.getAllReviews()
                 .stream()
-                .peek(review -> review.setUseful(reviewLikeDbStorage.getUseful(review.getReviewId())))
+                //Для каждого экземпляра класса Review обновляем поле useful через сеттер
+                .peek(review -> review.setUseful(getUsefulFromDb(review.getReviewId())))
+                .sorted(Comparator.comparing(Review::getUseful).reversed()) //Сортируем по убываю по полю useful
+                .limit(count)
+                .collect(Collectors.toList());
+    }
+
+    //Получить все отзывы к фильму по его id, выборку ограничиваем по count
+    public List<Review> getAllReviewsForFilm(Long filmId, Long count) {
+        return reviewDbStorage.getReviewsForFilm(filmId)
+                .stream()
+                .peek(review -> review.setUseful(getUsefulFromDb(review.getReviewId())))
                 .sorted(Comparator.comparing(Review::getUseful).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<Review> getAllReviews() {
-
-        return reviewDbStorage.getAllReviews()
-                .stream()
-                .peek(review -> review.setUseful(reviewLikeDbStorage.getUseful(review.getReviewId())))
-                .sorted(Comparator.comparing(Review::getUseful).reversed())
-                .limit(10)
-                .collect(Collectors.toList());
-    }
-
-    @Override
+    //Добавить лайк к отзыву
     public void addLike(Long reviewId, Long userId, Boolean isLike) {
         checkReviewInDb(reviewId);
         checkUserInDb(userId);
         reviewLikeDbStorage.addLike(reviewId, userId, isLike);
     }
 
-    @Override
+    //Удалить лайк к отзыву
     public void deleteLike(Long reviewId, Long userId, Boolean isLike) {
         checkReviewInDb(reviewId);
         checkUserInDb(userId);
         reviewLikeDbStorage.deleteLike(reviewId, userId, isLike);
     }
 
-    @Override
+    //Добавить дизлайк к отзыву
     public void addDislike(Long reviewId, Long userId, Boolean isLike) {
         checkReviewInDb(reviewId);
         checkUserInDb(userId);
         reviewLikeDbStorage.addDislike(reviewId, userId, isLike);
     }
 
-    @Override
+    //Удалить дизлайк к отзыву
     public void deleteDislike(Long reviewId, Long userId, Boolean isLike) {
         checkReviewInDb(reviewId);
-        checkUserInDb(userId);
+        //checkUserInDb(userId);
         reviewLikeDbStorage.deleteDislike(reviewId, userId, isLike);
     }
 
+    //Проверка id на null, проверка на наличие в БД
     private void checkReviewInDb(Long reviewId) {
         Optional<Review> reviewInDb = Optional.ofNullable(reviewDbStorage.getReviewById(reviewId));
         if (reviewInDb.isEmpty()) {
@@ -119,6 +117,7 @@ public class ReviewService implements ReviewStorage, ReviewLikeStorage {
         }
     }
 
+    //Проверка id на null, проверка на наличие в БД
     private void checkFilmInDb(Long filmId) {
         Optional<Film> filmInDb = Optional.ofNullable(filmDbStorage.getFilmById(filmId));
         if (filmInDb.isEmpty()) {
@@ -126,10 +125,23 @@ public class ReviewService implements ReviewStorage, ReviewLikeStorage {
         }
     }
 
+    //Проверка id на null, проверка на наличие в БД
     private void checkUserInDb(Long userId) {
         Optional<User> userInDb = Optional.ofNullable(userDbStorage.getUserById(userId));
         if (userInDb.isEmpty()) {
             throw new ArgumentNotFoundException("Юзер с id=" + userInDb + " не найден или id=null.");
+        }
+    }
+
+    /*Получить рейтинг отзыва (суммируем значения по полю useful в таблице review_like_list).
+    Если лайков или дизлайков нет - возвращается null, в таком случае полю useful в экземплярах класса Review
+    присваиваем значение 0.*/
+    private Long getUsefulFromDb(Long reviewId) {
+        Optional<Long> useful = Optional.ofNullable(reviewLikeDbStorage.getUsefulFromDb(reviewId));
+        if (useful.isEmpty()) {
+            return 0L;
+        } else {
+            return reviewLikeDbStorage.getUsefulFromDb(reviewId);
         }
     }
 

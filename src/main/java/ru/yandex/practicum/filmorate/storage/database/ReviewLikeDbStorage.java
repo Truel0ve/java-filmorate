@@ -50,7 +50,7 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
         log.info("Удален дизлайк к отзыву с id={} пользователем с id={}", reviewId, userId);
     }
 
-    public Long getUseful(Long reviewId) {
+    public Long getUsefulFromDb(Long reviewId) {
         String sqlQuery = "SELECT SUM(USEFUL) " +
                 "FROM REVIEW_LIKE_LIST " +
                 "WHERE REVIEW_ID=?";

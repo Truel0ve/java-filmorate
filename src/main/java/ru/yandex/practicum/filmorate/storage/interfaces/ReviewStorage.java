@@ -6,10 +6,10 @@ import java.util.List;
 
 public interface ReviewStorage {
     Review createReview(Review review);
-    Review updateReview(Review review);
+    void updateReview(Review review);
     void deleteReview(Long reviewId);
     Review getReviewById(Long reviewId);
-    List<Review> getAllReviewsFromFilm(Long filmId, Long count);
+    List<Review> getReviewsForFilm(Long filmId);
     List<Review> getAllReviews();
 
 }

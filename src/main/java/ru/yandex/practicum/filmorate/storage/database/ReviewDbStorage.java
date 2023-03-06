@@ -48,21 +48,17 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Review updateReview(Review review) {
+    public void updateReview(Review review) {
         String sqlQuery = "UPDATE REVIEWS " +
-                "SET USER_ID=?, FILM_ID=?, CONTENT=?, IS_POSITIVE=? " +
+                "SET CONTENT=?, IS_POSITIVE=? " +
                 "WHERE REVIEW_ID=?";
         jdbcTemplate.update(sqlQuery,
-                review.getUserId(),
-                review.getFilmId(),
                 review.getContent(),
                 review.getIsPositive(),
                 review.getReviewId());
 
         log.info("Обновлен отзыв с id={} к фильму с id={} от пользователя с id={}",
                 review.getReviewId(), review.getFilmId(), review.getUserId());
-
-        return review;
     }
 
     @Override
@@ -90,48 +86,38 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public List<Review> getAllReviewsFromFilm(Long filmId, Long count) throws ArgumentNotFoundException {
+    public List<Review> getReviewsForFilm(Long filmId) throws ArgumentNotFoundException {
         String sqlQuery = "SELECT * " +
                 "FROM REVIEWS " +
                 "WHERE FILM_ID=?";
-        List<Review> reviews = jdbcTemplate.query(sqlQuery, ReviewDbStorage::makeReview, filmId);
-        if (reviews.size() == 0) {
-            log.warn("Отзывы к фильму с id={} не найден в БД!", filmId);
-            throw new ArgumentNotFoundException("Отзывы к фильму с id=" + filmId + " не найдены");
-        }
-        log.info("Получены все отзывы к фильму с id={}. Отзывы отсортированы по полезности (DESC)", filmId);
 
-        return reviews;
+        log.info("Получены все отзывы к фильму с id={}", filmId);
+        return jdbcTemplate.query(sqlQuery, ReviewDbStorage::makeReview, filmId);
     }
 
     @Override
-    public List<Review> getAllReviews() {
+    public List<Review> getAllReviews() throws ArgumentNotFoundException {
         String sqlQuery = "SELECT * " +
-                "FROM REVIEWS ";
-        List<Review> reviews = jdbcTemplate.query(sqlQuery, ReviewDbStorage::makeReview);
-        if (reviews.size() == 0) {
-            log.warn("Отзывы не найден в БД!");
-            throw new ArgumentNotFoundException("Отзывы не найдены");
-        }
-        log.info("Получены все отзывы. Отзывы отсортированы по полезности (DESC)");
+                "FROM REVIEWS";
 
-        return reviews;
+        log.info("Получены все отзывы");
+        return jdbcTemplate.query(sqlQuery, ReviewDbStorage::makeReview);
     }
 
     public static Review makeReview(ResultSet rs, int rowNum) throws SQLException {
         Long id = rs.getLong("REVIEW_ID");
-        String content = rs.getString("CONTENT");
-        Boolean isPositive = rs.getBoolean("IS_POSITIVE");
         Long userId = rs.getLong("USER_ID");
         Long filmId = rs.getLong("FILM_ID");
+        String content = rs.getString("CONTENT");
+        Boolean isPositive = rs.getBoolean("IS_POSITIVE");
         Long useful = 0L;
 
         return Review.builder()
                 .reviewId(id)
-                .content(content)
-                .isPositive(isPositive)
                 .userId(userId)
                 .filmId(filmId)
+                .content(content)
+                .isPositive(isPositive)
                 .useful(useful)
                 .build();
     }
