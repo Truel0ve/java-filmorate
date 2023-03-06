@@ -85,6 +85,17 @@ public class FilmController {
         return new ArrayList<>(filmService.getCommonFilmsByFriends(userId, friendId));
     }
 
+    @GetMapping("/search")
+    public List<Film> searchFilm(@RequestParam(required = false) String query,
+                                 @RequestParam(required = false) List<String> by) {
+        logRequestMethod(RequestMethod.GET, "/search с параметрами 'query=" + query + "', 'by=" + by + "'");
+        String director = null;
+        String title = null;
+        if (by.contains("director")) director = "director";
+        if (by.contains("title")) title = "title";
+        return new ArrayList<>(filmService.searchFilm(query, director, title));
+    }
+
     private void logRequestMethod(RequestMethod requestMethod) {
         log.debug("Получен запрос " + requestMethod + " по адресу: /films");
     }
