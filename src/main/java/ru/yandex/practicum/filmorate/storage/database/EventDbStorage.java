@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.storage.database;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.mapping.Set;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.storage.database.rowmappers.EventRowMapper;
-import ru.yandex.practicum.filmorate.storage.database.rowmappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.storage.interfaces.EventStorage;
 
 import java.sql.Timestamp;
@@ -45,12 +43,14 @@ public class EventDbStorage implements EventStorage {
                         "WHERE user_id = ? " +
                         "AND status = true";
         HashSet<Long> friends = new HashSet<>(jdbcTemplate.queryForList(sqlSelectFriends, Long.class, userId));
+
         List<Event> events = new ArrayList<>();
 
-        for (Long friendId : friends) {
+       // for (Long friendId : friends) {
             String sqlGetEvent = "SELECT * FROM events WHERE user_id = ?";
-            events.addAll(jdbcTemplate.queryForStream(sqlGetEvent, new EventRowMapper(), friendId).collect(Collectors.toList()));
-        }
+            events.addAll(jdbcTemplate.queryForStream(
+                    sqlGetEvent, new EventRowMapper(), userId).collect(Collectors.toList()));
+      //  }
         return events;
     }
 }

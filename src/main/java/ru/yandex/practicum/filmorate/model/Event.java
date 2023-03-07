@@ -20,7 +20,7 @@ public class Event {
 
     long entityId;
 
-    Timestamp timestamp;
+    long timestamp;
 
 
 }

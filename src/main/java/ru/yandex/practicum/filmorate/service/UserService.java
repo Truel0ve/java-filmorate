@@ -66,7 +66,8 @@ public class UserService implements UserStorage, FriendStorage {
         validateUserId(userId);
         validateUserId(friendId);
         userStorage.getFriendDbStorage().addFriend(userId, friendId);
-        userStorage.getEventDbStorage().addEvent(userId, friendId, "FRIEND", "ADD");
+
+        addEvent(userId, friendId, "ADD");  //Добавление события в ленту событий
     }
 
     // Удалить пользователя из друзей
@@ -75,7 +76,8 @@ public class UserService implements UserStorage, FriendStorage {
         validateUserId(userId);
         validateUserId(friendId);
         userStorage.getFriendDbStorage().deleteFriend(userId, friendId);
-        userStorage.getEventDbStorage().addEvent(userId, friendId, "FRIEND", "REMOVE");
+
+        addEvent(userId, friendId, "REMOVE");   //Добавление события в ленту событий
     }
 
     @Override
@@ -111,5 +113,10 @@ public class UserService implements UserStorage, FriendStorage {
         if (userId == null || userStorage.getUserById(userId) == null) {
             throw new NullPointerException("ID пользователя не задан или отсутствует в базе.");
         }
+    }
+
+    // Добавление дружбы в ленту событий
+    public void addEvent(long userId, long reviewId, String operation) {
+        userStorage.getEventDbStorage().addEvent(userId, reviewId, "FRIEND", operation);
     }
 }

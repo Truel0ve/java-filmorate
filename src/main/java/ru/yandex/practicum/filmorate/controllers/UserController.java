@@ -3,9 +3,11 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.model.Event;;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
 @Slf4j
 public class UserController {
     private final UserService userService;
+    private final FilmService filmService;
 
     @GetMapping
     public List<User> getAllUsers() {
@@ -75,6 +78,12 @@ public class UserController {
     public List<Event> getEvents(@PathVariable("id") Long userId) {
         logRequestMethod(RequestMethod.GET, "/" + userId + "/feed");
         return userService.getEvents(userId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendation(@PathVariable("id") Long userId) {
+        logRequestMethod(RequestMethod.GET, "/" + userId + "/recommendation");
+        return filmService.getRecommendations(userId);
     }
 
     private void logRequestMethod(RequestMethod requestMethod) {
