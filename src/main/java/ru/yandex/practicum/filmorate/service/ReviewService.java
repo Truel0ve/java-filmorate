@@ -32,8 +32,10 @@ public class ReviewService {
     //Поместить отзыв в БД
     public Review createReview(Review review) {
         reviewValidator.validate(review); //Проверка переменных экземпляра класса Review
+        Review reviewWithId = reviewDbStorage.createReview(review);
 
-        return reviewDbStorage.createReview(review);
+        addEvent(reviewWithId.getUserId(), reviewWithId.getReviewId(), "ADD"); //Добавление события в ленту событий
+        return reviewWithId;
     }
 
     //Обновить отзыв в БД
@@ -42,12 +44,16 @@ public class ReviewService {
         checkReviewInDb(review.getReviewId()); //Проверка наличия отзыва в БД по его id
         reviewDbStorage.updateReview(review);
 
-        return getReviewById(review.getReviewId());
+        Review reviewWithId = getReviewById(review.getReviewId());
+        addEvent(reviewWithId.getUserId(), review.getReviewId(), "UPDATE"); //Добавление события в ленту событий
+        return reviewWithId;
     }
 
     //Удалить отзыв из БД по его id
     public void deleteReview(Long reviewId) {
         checkReviewInDb(reviewId);
+
+        addEvent(getReviewById(reviewId).getUserId(), reviewId, "REMOVE"); //Добавление события в ленту событий
         reviewDbStorage.deleteReview(reviewId);
     }
 
@@ -144,6 +150,11 @@ public class ReviewService {
         } else {
             return reviewLikeDbStorage.getUsefulFromDb(reviewId);
         }
+    }
+
+    //Добавление отзыва в ленту событий
+    public void addEvent(long userId, long reviewId, String operation) {
+        userDbStorage.getEventDbStorage().addEvent(userId, reviewId, "REVIEW", operation);
     }
 
 }

@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.model.Event;;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -71,6 +72,12 @@ public class UserController {
     public List<User> getMutualFriendList(@PathVariable("id") Long userId, @PathVariable Long otherId) {
         logRequestMethod(RequestMethod.GET, "/" + userId + "/friends/common/" + otherId);
         return userService.getCommonFriendList(userId, otherId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Event> getEvents(@PathVariable("id") Long userId) {
+        logRequestMethod(RequestMethod.GET, "/" + userId + "/feed");
+        return userService.getEvents(userId);
     }
 
     @GetMapping("/{id}/recommendations")

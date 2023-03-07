@@ -1,3 +1,4 @@
+
 create table IF NOT EXISTS DIRECTORS
 (
     DIRECTOR_ID   BIGINT generated always as identity primary key,

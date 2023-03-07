@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMethod;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.FriendStorage;
@@ -63,6 +66,8 @@ public class UserService implements UserStorage, FriendStorage {
         validateUserId(userId);
         validateUserId(friendId);
         userStorage.getFriendDbStorage().addFriend(userId, friendId);
+
+        addEvent(userId, friendId, "ADD");  //Добавление события в ленту событий
     }
 
     // Удалить пользователя из друзей
@@ -71,6 +76,8 @@ public class UserService implements UserStorage, FriendStorage {
         validateUserId(userId);
         validateUserId(friendId);
         userStorage.getFriendDbStorage().deleteFriend(userId, friendId);
+
+        addEvent(userId, friendId, "REMOVE");   //Добавление события в ленту событий
     }
 
     @Override
@@ -96,10 +103,20 @@ public class UserService implements UserStorage, FriendStorage {
                 .collect(Collectors.toList());
     }
 
+    public List<Event> getEvents(Long userId) {
+        validateUserId(userId);
+        return userStorage.getEventDbStorage().getEvents(userId);
+    }
+
     // Проверить корректность передаваемого ID пользователя
     public void validateUserId(Long userId) {
         if (userId == null || userStorage.getUserById(userId) == null) {
             throw new NullPointerException("ID пользователя не задан или отсутствует в базе.");
         }
+    }
+
+    // Добавление дружбы в ленту событий
+    public void addEvent(long userId, long reviewId, String operation) {
+        userStorage.getEventDbStorage().addEvent(userId, reviewId, "FRIEND", operation);
     }
 }

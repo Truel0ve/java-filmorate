@@ -72,6 +72,8 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
         validateFilmId(filmId);
         userService.validateUserId(userId);
         filmStorage.getLikeDbStorage().addLike(filmId, userId);
+
+        addEvent(userId, filmId, "ADD");  //Добавление события в ленту событий
     }
 
     // Удалить лайк фильму от пользователя
@@ -80,6 +82,8 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
         validateFilmId(filmId);
         userService.validateUserId(userId);
         filmStorage.getLikeDbStorage().deleteLike(filmId, userId);
+
+        addEvent(userId, filmId, "REMOVE");  //Добавление события в ленту событий
     }
 
     // Получить отсортированный по количеству лайков список фильмов, с опциональной возможностью фильтрации по году и жанру
@@ -207,5 +211,10 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
                         .stream()
                         .anyMatch(d -> d.getName().toLowerCase().contains(query.toLowerCase())))
                 .collect(Collectors.toSet());
+    }
+
+    //Добавление лайка в ленту событий
+    public void addEvent(long userId, long reviewId, String operation) {
+        userService.getUserStorage().getEventDbStorage().addEvent(userId, reviewId, "LIKE", operation);
     }
 }
