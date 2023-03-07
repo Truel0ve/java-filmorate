@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface EventStorage {
 
-    void addEvent(long userId, long entity_id, String eventType, String operation);
+    void addEvent(Long userId, Long entityId, String eventType, String operation);
 
-    List<Event> getEvents(long userId);
+    List<Event> getEvents(Long userId);
 }
 

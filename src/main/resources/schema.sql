@@ -86,8 +86,5 @@ CREATE TABLE IF NOT EXISTS events (
 	entity_id		BIGINT			,
 	timestamp		TIMESTAMP 		NOT NULL,
 	event_type		VARCHAR(20)		REFERENCES event_types (event_type) ON DELETE CASCADE,
-	operation		VARCHAR(20)		REFERENCES operations (operation) ON DELETE CASCADE,
-	FOREIGN KEY (entity_id) REFERENCES films (film_id) ON DELETE CASCADE,
-  	FOREIGN KEY (entity_id) REFERENCES users (user_id) ON DELETE CASCADE,
-  	FOREIGN KEY (entity_id) REFERENCES reviews (review_id) ON DELETE CASCADE
+	operation		VARCHAR(20)		REFERENCES operations (operation) ON DELETE CASCADE
 );

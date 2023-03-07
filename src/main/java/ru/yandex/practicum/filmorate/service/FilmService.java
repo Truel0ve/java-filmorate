@@ -214,7 +214,7 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
     }
 
     //Добавление лайка в ленту событий
-    public void addEvent(long userId, long reviewId, String operation) {
+    public void addEvent(Long userId, Long reviewId, String operation) {
         userService.getUserStorage().getEventDbStorage().addEvent(userId, reviewId, "LIKE", operation);
     }
 }
