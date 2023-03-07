@@ -4,8 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMethod;
+import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
@@ -111,7 +110,7 @@ public class UserService implements UserStorage, FriendStorage {
     // Проверить корректность передаваемого ID пользователя
     public void validateUserId(Long userId) {
         if (userId == null || userStorage.getUserById(userId) == null) {
-            throw new NullPointerException("ID пользователя не задан или отсутствует в базе.");
+            throw new ArgumentNotFoundException("ID пользователя не задан или отсутствует в базе.");
         }
     }
 

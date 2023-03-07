@@ -69,7 +69,7 @@ class FilmControllerTest {
                 .mpa(new Mpa(4L, "R"))
                 .build();
         newFilm.setId(null);
-        assertThrows(NullPointerException.class, () -> filmController.putFilm(newFilm));
+        assertThrows(ArgumentNotFoundException.class, () -> filmController.putFilm(newFilm));
         newFilm.setId(2L);
         assertThrows(ArgumentNotFoundException.class, () -> filmController.putFilm(newFilm));
     }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.database.DirectorDbStorage;
@@ -61,7 +62,7 @@ public class DirectorService implements DirectorStorage {
     // Проверить корректность передаваемого ID режиссёра
     private void validateDirectorId(Long directorId) {
         if (directorId == null || directorStorage.getDirectorById(directorId) == null) {
-            throw new NullPointerException("ID режиссера не задан или отсутствует в базе.");
+            throw new ArgumentNotFoundException("ID режиссера не задан или отсутствует в базе.");
         }
     }
 }

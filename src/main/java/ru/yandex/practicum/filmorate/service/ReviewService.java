@@ -4,16 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.database.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.database.ReviewDbStorage;
 import ru.yandex.practicum.filmorate.storage.database.ReviewLikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
 import ru.yandex.practicum.filmorate.validators.ReviewValidator;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +23,6 @@ public class ReviewService {
     private final ReviewDbStorage reviewDbStorage;
     private final ReviewLikeDbStorage reviewLikeDbStorage;
     private final ReviewValidator reviewValidator;
-    private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
 
     //Поместить отзыв в БД
@@ -112,7 +108,6 @@ public class ReviewService {
     //Удалить дизлайк к отзыву
     public void deleteDislike(Long reviewId, Long userId, Boolean isLike) {
         checkReviewInDb(reviewId);
-        //checkUserInDb(userId);
         reviewLikeDbStorage.deleteDislike(reviewId, userId, isLike);
     }
 
@@ -121,14 +116,6 @@ public class ReviewService {
         Optional<Review> reviewInDb = Optional.ofNullable(reviewDbStorage.getReviewById(reviewId));
         if (reviewInDb.isEmpty()) {
             throw new ArgumentNotFoundException("Отзыв с id=" + reviewId + " не найден или id=null.");
-        }
-    }
-
-    //Проверка id на null, проверка на наличие в БД
-    private void checkFilmInDb(Long filmId) {
-        Optional<Film> filmInDb = Optional.ofNullable(filmDbStorage.getFilmById(filmId));
-        if (filmInDb.isEmpty()) {
-            throw new ArgumentNotFoundException("Фильм с id=" + filmId + " не найден или id=null.");
         }
     }
 

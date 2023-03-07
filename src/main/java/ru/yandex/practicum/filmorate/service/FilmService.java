@@ -174,7 +174,7 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
     // Проверить корректность передаваемого ID фильма
     private void validateFilmId(Long filmId) {
         if (filmId == null || filmStorage.getFilmById(filmId) == null) {
-            throw new NullPointerException("ID фильма не задан или отсутствует в базе.");
+            throw new ArgumentNotFoundException("ID фильма не задан или отсутствует в базе.");
         }
     }
 

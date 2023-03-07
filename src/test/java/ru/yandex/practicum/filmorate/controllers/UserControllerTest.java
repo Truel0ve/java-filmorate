@@ -74,7 +74,7 @@ class UserControllerTest {
                 .birthday(LocalDate.of(1990, 12, 8))
                 .build();
         newUser.setId(null);
-        assertThrows(NullPointerException.class, () -> userController.putUser(newUser));
+        assertThrows(ArgumentNotFoundException.class, () -> userController.putUser(newUser));
         newUser.setId(2L);
         assertThrows(ArgumentNotFoundException.class, () -> userController.putUser(newUser));
     }
