@@ -37,10 +37,10 @@ public class InMemoryFilmStorage implements FilmStorage, LikeStorage {
     }
 
     @Override
-    public void deleteFilm(Film film) {
-        Long filmId = film.getId();
+    public void deleteFilm(Long filmId) {
+        String filmName = getFilmById(filmId).getName();
         films.remove(filmId);
-        log.info("Фильм \"" + film.getName() + "\" удален из базы.");
+        log.info("Фильм \"" + filmName + "\" удален из базы.");
     }
 
     @Override

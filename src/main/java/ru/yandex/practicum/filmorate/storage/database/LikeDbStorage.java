@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.storage.database;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.storage.interfaces.LikeStorage;
 
 @Component
-@Primary
 @RequiredArgsConstructor
 @Slf4j
 public class LikeDbStorage implements LikeStorage {

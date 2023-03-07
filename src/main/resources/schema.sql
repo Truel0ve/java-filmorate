@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS mpa (
 
 CREATE TABLE IF NOT EXISTS films (
                                      film_id 		BIGINT 			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                     name 			VARCHAR(50) 	UNIQUE NOT NULL,
+                                     film_name 		VARCHAR(50) 	NOT NULL,
                                      description 	VARCHAR(200) 	NOT NULL,
                                      release_date 	DATE 			NOT NULL CHECK (release_date >= '1895-12-28'),
                                      duration 		INTEGER 		NOT NULL CHECK (duration > 0),
@@ -77,42 +77,11 @@ CREATE TABLE IF NOT EXISTS operations (
 
 
 CREATE TABLE IF NOT EXISTS events (
-     event_id 		BIGINT 			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-     user_id		BIGINT			REFERENCES users (user_id) ON DELETE CASCADE,
-     entity_id		BIGINT,
-     timestamp		TIMESTAMP 		NOT NULL,
-     event_type     VARCHAR(20)		REFERENCES event_types (event_type) ON DELETE CASCADE,
-     operation		VARCHAR(20)		REFERENCES operations (operation) ON DELETE CASCADE
+                                      event_id 		BIGINT 			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                                      user_id			BIGINT			REFERENCES users (user_id) ON DELETE CASCADE,
+                                      entity_id		BIGINT			,
+                                      timestamp		TIMESTAMP 		NOT NULL,
+                                      event_type		VARCHAR(20)		REFERENCES event_types (event_type) ON DELETE CASCADE,
+                                      operation		VARCHAR(20)		REFERENCES operations (operation) ON DELETE CASCADE
+
 );
-
-
-DELETE FROM mpa;
-ALTER TABLE mpa ALTER COLUMN mpa_id RESTART WITH 1;
-
-DELETE FROM films;
-ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1;
-
-DELETE FROM genre_list;
-
-DELETE FROM genres;
-ALTER TABLE genres ALTER COLUMN genre_id RESTART WITH 1;
-
-DELETE FROM users;
-ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1;
-
-DELETE FROM friend_list;
-
-DELETE FROM like_list;
-
-DELETE FROM event_types;
-
-DELETE FROM operations;
-
-
-INSERT INTO mpa (mpa_name) values('G'), ('PG'), ('PG-13'), ('R'), ('NC-17');
-
-INSERT INTO genres (genre_name) values('Комедия'), ('Драма'), ('Мультфильм'), ('Триллер'), ('Документальный'), ('Боевик');
-
-INSERT INTO event_types (event_type) values ('LIKE'), ('REVIEW'), ('FRIEND');
-
-INSERT INTO operations (operation) values ('REMOVE'), ('ADD'), ('UPDATE');

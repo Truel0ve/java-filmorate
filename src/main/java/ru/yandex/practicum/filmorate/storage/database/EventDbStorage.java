@@ -25,6 +25,8 @@ public class EventDbStorage implements EventStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
+
+    // Создать новое событие
     @Override
     public void addEvent(long userId, long entity_id, String eventType, String operation) {
         String sqlAddEvent = "INSERT INTO events (user_id, entity_id, timestamp, event_type, operation) " +
@@ -34,6 +36,7 @@ public class EventDbStorage implements EventStorage {
         log.info("Добавлено новое событие пользрвателя с ID= " + userId + ".");
     }
 
+    // Получить ленту событий юзера
     @Override
     public List<Event> getEvents(long userId) {
         String sqlSelectFriends =

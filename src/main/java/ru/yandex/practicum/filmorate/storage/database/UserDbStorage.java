@@ -20,7 +20,6 @@ import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @Primary
@@ -71,17 +70,21 @@ public class UserDbStorage implements UserStorage {
 
     // Удалить пользователя
     @Override
-    public void deleteUser(User user) {
+    public void deleteUser(Long userId) {
         String sqlDeleteUser =
                 "DELETE FROM users " +
                 "WHERE user_id = ?";
-        jdbcTemplate.update(sqlDeleteUser, user.getId());
+        jdbcTemplate.update(sqlDeleteUser, userId);
         String sqlDeleteFriends =
                 "DELETE FROM friend_list " +
                 "WHERE user_id = ? " +
                 "AND friend_id = ?";
-        jdbcTemplate.update(sqlDeleteFriends, user.getId(), user.getId());
-        log.info("Пользователь с ID=" + user.getId() + " удален из базы.");
+        jdbcTemplate.update(sqlDeleteFriends, userId, userId);
+        String sqlDeleteLikes =
+                "DELETE FROM like_list " +
+                "WHERE user_id = ?";
+        jdbcTemplate.update(sqlDeleteLikes, userId);
+        log.info("Пользователь с ID=" + userId + " удален из базы.");
     }
 
     // Получить данные пользователя по ID
@@ -103,6 +106,6 @@ public class UserDbStorage implements UserStorage {
         String sqlSelectAll =
                 "SELECT * " +
                 "FROM users";
-        return jdbcTemplate.queryForStream(sqlSelectAll, new UserRowMapper()).collect(Collectors.toList());
+        return jdbcTemplate.query(sqlSelectAll, new UserRowMapper());
     }
 }
