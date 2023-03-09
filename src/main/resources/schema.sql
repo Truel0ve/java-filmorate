@@ -1,27 +1,37 @@
+
 CREATE TABLE IF NOT EXISTS mpa (
-	mpa_id  	    INTEGER			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	mpa_name 		VARCHAR(20)		UNIQUE NOT NULL
+	mpa_id 		BIGINT			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	mpa_name 	VARCHAR(20)		UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS films (
 	film_id 		BIGINT 			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	name 			VARCHAR(20) 	UNIQUE NOT NULL,
+	film_name 		VARCHAR(50) 	NOT NULL,
 	description 	VARCHAR(200) 	NOT NULL,
 	release_date 	DATE 			NOT NULL CHECK (release_date >= '1895-12-28'),
 	duration 		INTEGER 		NOT NULL CHECK (duration > 0),
 	rate			BIGINT			,
-	mpa_id 		    INTEGER 		REFERENCES mpa (mpa_id) ON DELETE CASCADE
+	mpa_id 			BIGINT 			REFERENCES mpa (mpa_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS genres (
-	genre_id 	INTEGER 		GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	genre_id 	BIGINT			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	genre_name 	VARCHAR(20)		UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS genre_list (
-	data_id		BIGINT		GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	genre_id 	INTEGER		NOT NULL REFERENCES genres (genre_id) ON DELETE CASCADE,
-	film_id 	BIGINT		NOT NULL REFERENCES films (film_id) ON DELETE CASCADE
+	genre_id 	BIGINT		REFERENCES genres (genre_id) ON DELETE CASCADE,
+	film_id 	BIGINT		REFERENCES films (film_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS directors (
+	director_id 	BIGINT 			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	director_name 	VARCHAR(50)		UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS director_list (
+	director_id 	BIGINT		REFERENCES directors (director_id) ON DELETE CASCADE,
+	film_id 		BIGINT		REFERENCES films (film_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -33,39 +43,48 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS friend_list (
-	data_id		BIGINT		GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	user_id		BIGINT		NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
-	friend_id	BIGINT		NOT NULL REFERENCES users (user_id) ON DELETE CASCADE CHECK (friend_id != user_id),
+	user_id		BIGINT		REFERENCES users (user_id) ON DELETE CASCADE,
+	friend_id	BIGINT		REFERENCES users (user_id) ON DELETE CASCADE CHECK (friend_id != user_id),
 	status		BOOLEAN		NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS like_list (
-	data_id  	BIGINT		GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	film_id		BIGINT		NOT NULL REFERENCES films (film_id) ON DELETE CASCADE,
-	user_id		BIGINT		NOT NULL REFERENCES users (user_id) ON DELETE CASCADE
+	film_id		BIGINT		REFERENCES films (film_id) ON DELETE CASCADE,
+	user_id		BIGINT		REFERENCES users (user_id) ON DELETE CASCADE
 );
 
-DELETE FROM mpa;
-ALTER TABLE mpa ALTER COLUMN mpa_id RESTART WITH 1;
+CREATE TABLE IF NOT EXISTS reviews (
+	review_id 		BIGINT 			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	user_id			BIGINT			REFERENCES users (user_id) ON DELETE CASCADE,
+	film_id			BIGINT			REFERENCES films (film_id) ON DELETE CASCADE,
+	content			VARCHAR(200) 	NOT NULL,
+	is_positive     BOOLEAN         NOT NULL,
+	rating			BIGINT			DEFAULT 0
 
-DELETE FROM films;
-ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1;
 
-DELETE FROM genre_list;
-ALTER TABLE genre_list ALTER COLUMN data_id RESTART WITH 1;
+);
 
-DELETE FROM genres;
-ALTER TABLE genres ALTER COLUMN genre_id RESTART WITH 1;
+CREATE TABLE IF NOT EXISTS review_like_list (
+	review_id 		BIGINT			REFERENCES reviews (review_id) ON DELETE CASCADE,
+	user_id			BIGINT			REFERENCES users (user_id) ON DELETE CASCADE,
+	is_like			BOOLEAN			NOT NULL
+);
 
-DELETE FROM users;
-ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1;
 
-DELETE FROM friend_list;
-ALTER TABLE friend_list ALTER COLUMN data_id RESTART WITH 1;
+CREATE TABLE IF NOT EXISTS event_types (
+	event_type 	VARCHAR(20) 	UNIQUE NOT NULL
+);
 
-DELETE FROM like_list;
-ALTER TABLE like_list ALTER COLUMN data_id RESTART WITH 1;
+CREATE TABLE IF NOT EXISTS operations (
+	operation 	VARCHAR(20) 	UNIQUE NOT NULL
+);
 
-INSERT INTO mpa (mpa_name) values('G'), ('PG'), ('PG-13'), ('R'), ('NC-17');
 
-INSERT INTO genres (genre_name) values('Комедия'), ('Драма'), ('Мультфильм'), ('Триллер'), ('Документальный'), ('Боевик');
+CREATE TABLE IF NOT EXISTS events (
+	event_id 		BIGINT 			GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	user_id			BIGINT			REFERENCES users (user_id) ON DELETE CASCADE,
+	entity_id		BIGINT			,
+	timestamp		TIMESTAMP 		NOT NULL,
+	event_type		VARCHAR(20)		REFERENCES event_types (event_type) ON DELETE CASCADE,
+	operation		VARCHAR(20)		REFERENCES operations (operation) ON DELETE CASCADE
+);

@@ -29,7 +29,7 @@ class UserControllerTest {
     @BeforeEach
     void beforeEach() {
         for (User u : userController.getAllUsers()) {
-            userController.deleteUser(u);
+            userController.deleteUser(u.getId());
         }
     }
 
@@ -74,7 +74,7 @@ class UserControllerTest {
                 .birthday(LocalDate.of(1990, 12, 8))
                 .build();
         newUser.setId(null);
-        assertThrows(NullPointerException.class, () -> userController.putUser(newUser));
+        assertThrows(ArgumentNotFoundException.class, () -> userController.putUser(newUser));
         newUser.setId(2L);
         assertThrows(ArgumentNotFoundException.class, () -> userController.putUser(newUser));
     }
@@ -93,7 +93,7 @@ class UserControllerTest {
         userController.postUser(user);
         assertEquals(user, userController.getUserById(user.getId()),
                 "Пользователь не соответствует ожидаемому значению.");
-        userController.deleteUser(user);
+        userController.deleteUser(user.getId());
         assertThrows(ArgumentNotFoundException.class,
                 () -> userController.getUserById(user.getId()));
     }

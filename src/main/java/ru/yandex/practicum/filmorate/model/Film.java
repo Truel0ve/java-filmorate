@@ -24,6 +24,7 @@ public class Film implements Comparable<Film> {
     private Long rate;
     private Mpa mpa;
     private Set<Genre> genres;
+    private Set<Director> directors;
 
     @Override
     public boolean equals(Object obj) {

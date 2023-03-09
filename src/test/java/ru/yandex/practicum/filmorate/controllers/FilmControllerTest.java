@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
@@ -35,26 +34,13 @@ class FilmControllerTest {
     @BeforeEach
     void beforeEach() {
         for (Film f : filmController.getAllFilms()) {
-            filmController.deleteFilm(f);
+            filmController.deleteFilm(f.getId());
         }
     }
 
     @Test
     void shouldCreateNewFilm() {
         assertEquals(film, filmController.postFilm(film), "Новый фильм не добавлен.");
-    }
-
-    @Test
-    void shouldNotCreateThenNewFilmHasSameName() {
-        filmController.postFilm(film);
-        Film newFilm = Film.builder()
-                .name("Терминатор")
-                .description("Фильм со Шварценеггером в главной роли.")
-                .releaseDate(LocalDate.of(1984, 10, 26))
-                .duration(108)
-                .mpa(new Mpa(4L, "R"))
-                .build();
-        assertThrows(ValidationException.class, () -> filmController.postFilm(newFilm));
     }
 
     @Test
@@ -83,7 +69,7 @@ class FilmControllerTest {
                 .mpa(new Mpa(4L, "R"))
                 .build();
         newFilm.setId(null);
-        assertThrows(NullPointerException.class, () -> filmController.putFilm(newFilm));
+        assertThrows(ArgumentNotFoundException.class, () -> filmController.putFilm(newFilm));
         newFilm.setId(2L);
         assertThrows(ArgumentNotFoundException.class, () -> filmController.putFilm(newFilm));
     }
@@ -102,7 +88,7 @@ class FilmControllerTest {
         filmController.postFilm(film);
         assertEquals(film, filmController.getFilmById(film.getId()),
                 "Фильм не соответствует ожидаемому значению.");
-        filmController.deleteFilm(film);
+        filmController.deleteFilm(film.getId());
         assertThrows(ArgumentNotFoundException.class,
                 () -> filmController.getFilmById(film.getId()));
     }
@@ -121,7 +107,7 @@ class FilmControllerTest {
         assertTrue(filmController.getFilmById(filmId).getLikes().contains(userId), "Лайк пользователя не добавлен.");
         filmController.deleteLike(filmId, userId);
         assertFalse(filmController.getFilmById(filmId).getLikes().contains(userId), "Лайк пользователя не удален.");
-        filmController.getFilmService().getUserService().deleteUser(user);
+        filmController.getFilmService().getUserService().deleteUser(user.getId());
     }
 
     @Test
@@ -135,7 +121,7 @@ class FilmControllerTest {
         Long userId = filmController.getFilmService().getUserService().createUser(user).getId();
         Long filmId = filmController.postFilm(film).getId();
         filmController.addLike(filmId, userId);
-        List<Film> films = filmController.getPopularFilms(1L);
+        List<Film> films = filmController.getPopularFilms(1L, null, null);
         assertEquals(1, films.size(), "Неверное количество фильмов в списке популярных.");
         assertEquals(film, films.get(0), "Фильм отсутствует в списке популярных.");
     }

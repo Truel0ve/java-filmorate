@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.database;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-@Primary
 @RequiredArgsConstructor
 @Slf4j
 public class FriendDbStorage implements FriendStorage {
