@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.database;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -23,11 +22,8 @@ import java.util.*;
 @Primary
 @RequiredArgsConstructor
 @Slf4j
-@Getter
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final FriendDbStorage friendDbStorage;
-    private final EventDbStorage EventDbStorage;
 
     // Создать нового пользователя
     @Override
@@ -47,9 +43,9 @@ public class UserDbStorage implements UserStorage {
             }, keyHolder);
             Long userId = Objects.requireNonNull(keyHolder.getKey()).longValue();
             user.setId(userId);
-            log.info("Добавлен новый пользователь с ID=" + userId + ".");
+            log.info("Добавлен новый пользователь с ID={}", userId);
         } catch (DuplicateKeyException e) {
-            throw new ValidationException("Пользователь с логином " + user.getLogin() + " и E-mail " + user.getEmail() + " уже есть в базе.");
+            throw new ValidationException("Пользователь с логином " + user.getLogin() + " и E-mail " + user.getEmail() + " уже есть в базе");
         }
         return user;
     }
@@ -62,7 +58,7 @@ public class UserDbStorage implements UserStorage {
                 "SET email = ?2, login = ?3, name = ?4, birthday = ?5 " +
                 "WHERE user_id = ?1";
         jdbcTemplate.update(sqlUpdateUser, user.getId(), user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
-        log.info("Внесены изменения в данные пользователя с ID=" + user.getId() + ".");
+        log.info("Внесены изменения в данные пользователя с ID={}", user.getId());
         return user;
     }
 
@@ -82,7 +78,7 @@ public class UserDbStorage implements UserStorage {
                 "DELETE FROM like_list " +
                 "WHERE user_id = ?";
         jdbcTemplate.update(sqlDeleteLikes, userId);
-        log.info("Пользователь с ID=" + userId + " удален из базы.");
+        log.info("Пользователь с ID={} удален из базы", userId);
     }
 
     // Получить данные пользователя по ID

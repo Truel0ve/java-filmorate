@@ -1,72 +1,57 @@
 package ru.yandex.practicum.filmorate.validators;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 
-@Service
-@Slf4j
+@Component
 public class ReviewValidator {
 
-    public void validate(Review review) {
-        validateReview(review);
-        validateContentField(review);
-        validateIsPositiveField(review);
-        validateUserField(review);
-        validateFilmField(review);
+    public void validate(Review review) throws ValidationException, ArgumentNotFoundException {
+        validateNotNull(review);
+        validateContent(review);
+        validateIsPositive(review);
+        validateUserId(review);
+        validateFilmId(review);
     }
 
-    private void validateReview(Review review) {
+    private void validateNotNull(Review review) throws ValidationException {
         if (review == null) {
-            log.warn("Экземпляр класса Review равно null!");
-            throw new ValidationException("Данные отзыва не указаны.");
+            throw new ValidationException("Данные отзыва не указаны");
         }
     }
 
-    private void validateContentField(Review review) {
-        if (review.getContent() == null) {
-            log.warn("Описание отзыва равно null!");
-            throw new ValidationException("Описание равно null");
-        }
-        if (review.getContent().isBlank()) {
-            log.warn("Отзыв не содержит описания!");
-            throw new ValidationException("Описание отзыва не указано.");
+    private void validateContent(Review review) throws ValidationException {
+        if (review.getContent() == null || review.getContent().isBlank()) {
+            throw new ValidationException("Содержание отзыва не указано");
         }
         if (review.getContent().length() > 200) {
-            log.warn("Описание отзыва содержит более 200 символов!");
-            throw new ValidationException("Описание отзыва не может превышать 200 символов.");
+            throw new ValidationException("Содержание отзыва не может превышать 200 символов");
         }
     }
 
-    private void validateIsPositiveField(Review review) {
+    private void validateIsPositive(Review review) throws ValidationException {
         if (review.getIsPositive() == null) {
-            log.warn("Не указан тип отзыва!");
-            throw new ValidationException("Тип отзыва не указан.");
+            throw new ValidationException("Тип отзыва не указан");
         }
     }
 
-    private void validateUserField(Review review) {
+    private void validateUserId(Review review) throws ValidationException, ArgumentNotFoundException {
         if (review.getUserId() == null) {
-            log.warn("id пользователя равно null!");
-            throw new ValidationException("id пользователя равно null");
+            throw new ValidationException("ID пользователя не указан");
         }
-        if (review.getUserId() < 0) {
-            log.warn("id пользователя меньше нуля!");
-            throw new ArgumentNotFoundException("id пользователя меньше нуля.");
+        if (review.getUserId() <= 0) {
+            throw new ArgumentNotFoundException("Значение ID пользователя не может быть меньше или равно 0");
         }
     }
 
-    private void validateFilmField(Review review) {
+    private void validateFilmId(Review review) throws ValidationException, ArgumentNotFoundException {
         if (review.getFilmId() == null) {
-            log.warn("id фильма равно null!");
-            throw new ValidationException("id фильма равно null");
+            throw new ValidationException("ID фильма не указан");
         }
-        if (review.getFilmId() < 0) {
-            log.warn("id фильма меньше нуля!");
-            throw new ArgumentNotFoundException("Значение id меньше нуля.");
+        if (review.getFilmId() <= 0) {
+            throw new ArgumentNotFoundException("Значение ID фильма не может быть меньше или равно 0");
         }
     }
-
 }

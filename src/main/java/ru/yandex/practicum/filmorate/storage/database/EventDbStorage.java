@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.database;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Event;
@@ -13,31 +12,28 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Component
-@Primary
 @RequiredArgsConstructor
 @Slf4j
 public class EventDbStorage implements EventStorage {
-
     private final JdbcTemplate jdbcTemplate;
-
 
     // Создать новое событие
     @Override
     public void addEvent(Long userId, Long entityId, String eventType, String operation) {
-        String sqlAddEvent = "INSERT INTO events (user_id, entity_id, timestamp, event_type, operation) " +
+        String sqlInsertEvent =
+                "INSERT INTO events (user_id, entity_id, timestamp, event_type, operation) " +
                 "VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sqlAddEvent, userId, entityId,
-                new Timestamp(System.currentTimeMillis()), eventType, operation);
-        log.info("Добавлено новое событие пользователя с ID= " + userId + ".");
+        jdbcTemplate.update(sqlInsertEvent, userId, entityId, new Timestamp(System.currentTimeMillis()), eventType, operation);
+        log.info("Добавлено новое событие пользователя ID={}", userId);
     }
 
-    // Получить ленту событий юзера
+    // Получить ленту событий пользователя
     @Override
-    public List<Event> getEvents(Long userId) {
-        String sqlGetEvent =
+    public List<Event> getAllEvents(Long userId) {
+        String sqlSelectEvent =
                 "SELECT * " +
                 "FROM events " +
                 "WHERE user_id = ?";
-        return jdbcTemplate.query(sqlGetEvent, new EventRowMapper(), userId);
+        return jdbcTemplate.query(sqlSelectEvent, new EventRowMapper(), userId);
     }
 }

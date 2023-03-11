@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.database;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
@@ -12,22 +11,21 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
     // Получить MPA-рейтинг фильма по ID
     @Override
-    public Mpa getMpaById(Long id) {
+    public Mpa getMpaById(Long mpaId) {
         String sqlSelectMpa =
                 "SELECT * " +
                 "FROM mpa " +
                 "WHERE mpa_id = ?";
         List<Mpa> mpaList = jdbcTemplate.query(sqlSelectMpa,
-                (rs, rowNum) -> new Mpa(rs.getLong("mpa_id"), rs.getString("mpa_name")), id);
+                (rs, rowNum) -> new Mpa(rs.getLong("mpa_id"), rs.getString("mpa_name")), mpaId);
         return mpaList.stream()
                 .findFirst()
-                .orElseThrow(() -> new ArgumentNotFoundException("MPA-рейтинг с ID=" + id + " отсутствует в базе"));
+                .orElseThrow(() -> new ArgumentNotFoundException("MPA-рейтинг с ID=" + mpaId + " отсутствует в базе"));
     }
 
     // Получить список всех доступных MPA-рейтингов фильмов

@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.interfaces;
 
-public interface LikeStorage {
+public interface FilmLikeStorage {
 
     void addLike(Long filmId, Long userId);
 

@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -26,8 +26,8 @@ class UserControllerTest {
             .birthday(LocalDate.of(1990, 12, 8))
             .build();
 
-    @BeforeEach
-    void beforeEach() {
+    @AfterEach
+    void afterEach() {
         for (User u : userController.getAllUsers()) {
             userController.deleteUser(u.getId());
         }

@@ -1,21 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.database.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.LikeStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.MpaStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
+import ru.yandex.practicum.filmorate.validators.IdValidator;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -23,13 +15,10 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-@Slf4j
-@Getter
-public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreStorage {
+public class FilmService implements FilmStorage {
     private final FilmDbStorage filmStorage;
-    private final UserService userService;
-    private final DirectorService directorService;
     private final FilmValidator filmValidator;
+    private final IdValidator idValidator;
 
     // Создать новый фильм
     @Override
@@ -41,7 +30,7 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
     // Обновить данные фильма
     @Override
     public Film updateFilm(Film film) {
-        validateFilmId(film.getId());
+        idValidator.validateFilmId(film.getId());
         filmValidator.validate(film);
         return filmStorage.updateFilm(film);
     }
@@ -49,14 +38,14 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
     // Удалить фильм
     @Override
     public void deleteFilm(Long filmId) {
-        validateFilmId(filmId);
+        idValidator.validateFilmId(filmId);
         filmStorage.deleteFilm(filmId);
     }
 
     // Получить данные фильма по ID
     @Override
     public Film getFilmById(Long filmId) {
-        validateFilmId(filmId);
+        idValidator.validateFilmId(filmId);
         return filmStorage.getFilmById(filmId);
     }
 
@@ -64,26 +53,6 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
     @Override
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
-    }
-
-    // Поставить лайк фильму от пользователя
-    @Override
-    public void addLike(Long filmId, Long userId) {
-        validateFilmId(filmId);
-        userService.validateUserId(userId);
-        filmStorage.getLikeDbStorage().addLike(filmId, userId);
-
-        addEvent(userId, filmId, "ADD");  //Добавление события в ленту событий
-    }
-
-    // Удалить лайк фильму от пользователя
-    @Override
-    public void deleteLike(Long filmId, Long userId) {
-        validateFilmId(filmId);
-        userService.validateUserId(userId);
-        filmStorage.getLikeDbStorage().deleteLike(filmId, userId);
-
-        addEvent(userId, filmId, "REMOVE");  //Добавление события в ленту событий
     }
 
     // Получить отсортированный по количеству лайков список фильмов, с опциональной возможностью фильтрации по году и жанру
@@ -116,66 +85,14 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
                 .collect(Collectors.toSet());
     }
 
-    // Получить список всех фильмов режиссёра, отсортированных по годам или количеству лайков
-    public List<Film> getDirectorsFilms(Long directorId, String sortBy) {
-        List<Film> directorsFilms = directorService.getDirectorsFilms(directorId);
-        if (!directorsFilms.isEmpty()) {
-            switch (sortBy) {
-                case "year":
-                    return directorsFilms.stream()
-                            .sorted(Comparator.comparing(Film::getReleaseDate))
-                            .collect(Collectors.toList());
-                case "likes":
-                    return directorsFilms.stream()
-                            .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
-                            .collect(Collectors.toList());
-                default:
-                    throw new ArgumentNotFoundException("Неверный параметр запроса");
-            }
-        } else {
-            throw new ArgumentNotFoundException("В базе нет фильмов выбранного режиссёра");
-        }
-    }
-
-    // Получить MPA-рейтинг фильма по ID
-    @Override
-    public Mpa getMpaById(Long id) {
-        return filmStorage.getMpaDbStorage().getMpaById(id);
-    }
-
-    // Получить список всех доступных MPA-рейтингов фильмов
-    @Override
-    public List<Mpa> getAllMpa() {
-        return filmStorage.getMpaDbStorage().getAllMpa();
-    }
-
-    // Получить жанр фильма по ID
-    @Override
-    public Genre getGenreById(Long id) {
-        return filmStorage.getGenreDbStorage().getGenreById(id);
-    }
-
-    // Получить все доступные жанры фильмов
-    @Override
-    public List<Genre> getAllGenres() {
-        return filmStorage.getGenreDbStorage().getAllGenres();
-    }
-
     // Получить список фильмов общих с другом
     public Set<Film> getCommonFilmsByFriends(Long userId, Long friendId) {
         return new TreeSet<>(filmStorage.getCommonFilmsByFriends(userId, friendId));
     }
 
-    //Получить список рекомендованных фильмов для ID пользователя
+    // Получить список рекомендованных фильмов для пользователя
     public List<Film> getRecommendations(Long userId) {
         return filmStorage.getRecommendations(userId);
-    }
-
-    // Проверить корректность передаваемого ID фильма
-    private void validateFilmId(Long filmId) {
-        if (filmId == null || filmStorage.getFilmById(filmId) == null) {
-            throw new ArgumentNotFoundException("ID фильма не задан или отсутствует в базе.");
-        }
     }
 
     // Поиск фильмов по подстроке с опциональными параметрами поиска по названию и режиссёру
@@ -211,10 +128,5 @@ public class FilmService implements FilmStorage, LikeStorage, MpaStorage, GenreS
                         .stream()
                         .anyMatch(d -> d.getName().toLowerCase().contains(query.toLowerCase())))
                 .collect(Collectors.toSet());
-    }
-
-    //Добавление лайка в ленту событий
-    public void addEvent(Long userId, Long reviewId, String operation) {
-        userService.getUserStorage().getEventDbStorage().addEvent(userId, reviewId, "LIKE", operation);
     }
 }

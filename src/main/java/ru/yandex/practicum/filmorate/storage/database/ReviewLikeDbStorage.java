@@ -12,52 +12,49 @@ import ru.yandex.practicum.filmorate.storage.interfaces.ReviewLikeStorage;
 public class ReviewLikeDbStorage implements ReviewLikeStorage {
     private final JdbcTemplate jdbcTemplate;
 
+    // Поставить лайк/дизлайк отзыву
     @Override
-    public void addLike(Long reviewId, Long userId, Boolean isLike) {
-        //Переменная useful вставляется в поле useful. Если лайк, то +1, если дизлайк, то -1
-        //Рейтинг считаем, суммируя значения по полю useful
-        Integer useful = 1;
-        String sqlQuery = "INSERT INTO REVIEW_LIKE_LIST (REVIEW_ID, USER_ID, IS_LIKE, USEFUL) " +
-                "VALUES (?,?,?,?)";
-        jdbcTemplate.update(sqlQuery, reviewId, userId, isLike, useful);
-        log.info("Поставлен лайк к отзыву с id={} пользователем с id={}", reviewId, userId);
+    public void addLikeOrDislike(Long reviewId, Long userId, String isPositive) {
+        String sqlInsert =
+                "INSERT INTO review_like_list (review_id, user_id, is_positive) " +
+                "VALUES (?,?,?)";
+        boolean isLike = Boolean.parseBoolean(isPositive);
+        jdbcTemplate.update(sqlInsert, reviewId, userId, isLike);
+        updateUseful(reviewId, isLike);
+        log.info("Поставлен {} отзыву ID={} пользователем ID={}", getLikeValue(isLike), reviewId, userId);
     }
 
+    // Удалить лайк/дизлайк отзыву
     @Override
-    public void deleteLike(Long reviewId, Long userId, Boolean isLike) {
-        String sqlQuery = "DELETE FROM REVIEW_LIKE_LIST " +
-                "WHERE REVIEW_ID=? AND USER_ID=? AND IS_LIKE=?";
-        jdbcTemplate.update(sqlQuery, reviewId, userId, isLike);
-        log.info("Удален лайк к отзыву с id={} пользователем с id={}", reviewId, userId);
+    public void deleteLikeOrDislike(Long reviewId, Long userId, String isPositive) {
+        String sqlDelete =
+                "DELETE FROM review_like_list " +
+                "WHERE review_id = ? AND user_id = ? AND is_positive = ?";
+        boolean isLike = Boolean.parseBoolean(isPositive);
+        jdbcTemplate.update(sqlDelete, reviewId, userId, isLike);
+        updateUseful(reviewId, !isLike);
+        log.info("Удален {} отзыву ID={} пользователем ID={}", getLikeValue(isLike), reviewId, userId);
     }
 
-    @Override
-    public void addDislike(Long reviewId, Long userId, Boolean isLike) {
-        //Переменная like вставляется в поле useful. Если лайк, то +1, если дизлайк, то -1
-        //Рейтинг считаем, суммируя значения по полю useful
-        Integer useful = -1;
-        String sqlQuery = "INSERT INTO REVIEW_LIKE_LIST (REVIEW_ID, USER_ID, IS_LIKE, USEFUL) " +
-                "VALUES (?,?,?,?)";
-        jdbcTemplate.update(sqlQuery, reviewId, userId, isLike, useful);
-        log.info("Поставлен дизлайк к отзыву с id={} пользователем с id={}", reviewId, userId);
+    // Обновить рейтинг полезности отзыва
+    private void updateUseful(Long reviewId, boolean isLike) {
+        String sqlUpdateUseful;
+        if (isLike) {
+            sqlUpdateUseful =
+                    "UPDATE reviews " +
+                    "SET useful = useful + 1 " +
+                    "WHERE review_id = ?";
+        } else {
+            sqlUpdateUseful =
+                    "UPDATE reviews " +
+                    "SET useful = useful - 1 " +
+                    "WHERE review_id = ?";
+        }
+        jdbcTemplate.update(sqlUpdateUseful, reviewId);
     }
 
-    @Override
-    public void deleteDislike(Long reviewId, Long userId, Boolean isLike) {
-        String sqlQuery = "DELETE FROM REVIEW_LIKE_LIST " +
-                "WHERE REVIEW_ID=? AND USER_ID=? AND IS_LIKE=?";
-        jdbcTemplate.update(sqlQuery, reviewId, userId, isLike);
-        log.info("Удален дизлайк к отзыву с id={} пользователем с id={}", reviewId, userId);
+    // Определить лайк/дизлайк
+    private String getLikeValue(boolean isLike) {
+        return (isLike) ? "лайк" : "дизлайк";
     }
-
-    public Long getUsefulFromDb(Long reviewId) {
-        String sqlQuery = "SELECT SUM(USEFUL) " +
-                "FROM REVIEW_LIKE_LIST " +
-                "WHERE REVIEW_ID=?";
-        Long useful = jdbcTemplate.queryForObject(sqlQuery, Long.class, reviewId);
-
-        log.info("Получен рейтинг полезности к отзыву с id={}", reviewId);
-        return useful;
-    }
-
 }

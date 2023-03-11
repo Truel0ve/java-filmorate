@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.FilmLikeStorage;
 
 import java.util.*;
 
 @Component
 @Slf4j
-public class InMemoryFilmStorage implements FilmStorage, LikeStorage {
+public class InMemoryFilmStorage implements FilmStorage, FilmLikeStorage {
     private final Map<Long, Film> films = new HashMap<>();
     private Long newId = 0L;
 
