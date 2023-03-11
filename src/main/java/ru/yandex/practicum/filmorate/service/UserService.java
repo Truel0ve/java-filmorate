@@ -1,28 +1,21 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
-import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
+import ru.yandex.practicum.filmorate.validators.IdValidator;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-@Slf4j
-@Getter
-public class UserService implements UserStorage, FriendStorage {
+public class UserService implements UserStorage {
     private final UserDbStorage userStorage;
     private final UserValidator userValidator;
+    private final IdValidator idValidator;
 
     // Создать нового пользователя
     @Override
@@ -34,7 +27,7 @@ public class UserService implements UserStorage, FriendStorage {
     // Обновить данные пользователя
     @Override
     public User updateUser(User user) {
-        validateUserId(user.getId());
+        idValidator.validateUserId(user.getId());
         userValidator.validate(user);
         return userStorage.updateUser(user);
     }
@@ -42,14 +35,14 @@ public class UserService implements UserStorage, FriendStorage {
     // Удалить пользователя
     @Override
     public void deleteUser(Long userId) {
-        validateUserId(userId);
+        idValidator.validateUserId(userId);
         userStorage.deleteUser(userId);
     }
 
     // Получить данные пользователя по ID
     @Override
     public User getUserById(Long userId) {
-        validateUserId(userId);
+        idValidator.validateUserId(userId);
         return userStorage.getUserById(userId);
     }
 
@@ -57,65 +50,5 @@ public class UserService implements UserStorage, FriendStorage {
     @Override
     public List<User> getAllUsers() {
         return userStorage.getAllUsers();
-    }
-
-    // Добавить пользователя в друзья
-    @Override
-    public void addFriend(Long userId, Long friendId) {
-        validateUserId(userId);
-        validateUserId(friendId);
-        userStorage.getFriendDbStorage().addFriend(userId, friendId);
-
-        addEvent(userId, friendId, "ADD");  //Добавление события в ленту событий
-    }
-
-    // Удалить пользователя из друзей
-    @Override
-    public void deleteFriend(Long userId, Long friendId) {
-        validateUserId(userId);
-        validateUserId(friendId);
-        userStorage.getFriendDbStorage().deleteFriend(userId, friendId);
-
-        addEvent(userId, friendId, "REMOVE");   //Добавление события в ленту событий
-    }
-
-    @Override
-    public Set<Long> getAllFriends(Long userId) {
-        validateUserId(userId);
-        return userStorage.getFriendDbStorage().getAllFriends(userId);
-    }
-
-    // Получить список всех друзей пользователя по ID
-    public List<User> getFriendList(Long userId) {
-        return getAllFriends(userId).stream()
-                .map(userStorage::getUserById)
-                .collect(Collectors.toList());
-    }
-
-    // Получить список общих друзей пользователей с userId и otherId
-    public List<User> getCommonFriendList(Long userId, Long otherId) {
-        Set<Long> friendSet = getAllFriends(userId);
-        Set<Long> otherSet = getAllFriends(otherId);
-        return friendSet.stream()
-                .filter(otherSet::contains)
-                .map(userStorage::getUserById)
-                .collect(Collectors.toList());
-    }
-
-    public List<Event> getEvents(Long userId) {
-        validateUserId(userId);
-        return userStorage.getEventDbStorage().getEvents(userId);
-    }
-
-    // Проверить корректность передаваемого ID пользователя
-    public void validateUserId(Long userId) {
-        if (userId == null || userStorage.getUserById(userId) == null) {
-            throw new ArgumentNotFoundException("ID пользователя не задан или отсутствует в базе.");
-        }
-    }
-
-    // Добавление дружбы в ленту событий
-    public void addEvent(long userId, long reviewId, String operation) {
-        userStorage.getEventDbStorage().addEvent(userId, reviewId, "FRIEND", operation);
     }
 }

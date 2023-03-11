@@ -27,7 +27,7 @@ public class FriendDbStorage implements FriendStorage {
                     "AND friend_id = ?";
             Boolean userStatus = jdbcTemplate.queryForObject(sqlSelectStatus, Boolean.class, userId, friendId);
             if (Boolean.TRUE.equals(userStatus)) {
-                log.info("Пользователь с ID=" + userId + " уже добавил пользователя с ID=" + friendId + " в друзья.");
+                log.info("Пользователь ID={} уже добавил пользователя ID={} в друзья", userId, friendId);
             } else {
                 String sqlUpdateStatus =
                         "UPDATE friend_list " +
@@ -35,8 +35,8 @@ public class FriendDbStorage implements FriendStorage {
                         "WHERE user_id = ?1 " +
                         "AND friend_id = ?2";
                 jdbcTemplate.update(sqlUpdateStatus, userId, friendId, true);
-                log.info("Пользователь с ID=" + userId + " одобрил заявку в друзья пользователя с ID=" + friendId + "." +
-                        " Теперь пользователи с ID=" + userId + " и ID=" + friendId + " друзья.");
+                log.info("Пользователь ID=" + userId + " одобрил заявку в друзья пользователя ID=" + friendId + "\n" +
+                        "Теперь пользователи ID=" + userId + " и ID=" + friendId + " друзья");
             }
         } catch (EmptyResultDataAccessException e) {
             String sqlInsertFriends =
@@ -44,8 +44,8 @@ public class FriendDbStorage implements FriendStorage {
                     "VALUES (?, ?, ?)";
             jdbcTemplate.update(sqlInsertFriends,userId, friendId, true);
             jdbcTemplate.update(sqlInsertFriends,friendId, userId, false);
-            log.info("Пользователь с ID=" + userId + " добавил в друзья пользователя с ID=" + friendId + "." +
-                    " Требуется подтверждение дружбы от пользователя с ID=" + friendId + ".");
+            log.info("Пользователь ID=" + userId + " добавил в друзья пользователя ID=" + friendId + "\n" +
+                    "Требуется подтверждение дружбы от пользователя ID=" + friendId);
         }
     }
 
@@ -58,7 +58,7 @@ public class FriendDbStorage implements FriendStorage {
                     "WHERE user_id = ? " +
                     "AND friend_id = ?";
             jdbcTemplate.update(sqlDeleteFriend, userId, friendId);
-            log.info("Пользователь с ID=" + userId + " удалил из друзей пользователя с ID=" + userId + ".");
+            log.info("Пользователь ID={} удалил из друзей пользователя ID={}", userId, friendId);
             String sqlSelectStatus =
                     "SELECT status " +
                     "FROM friend_list " +
@@ -72,11 +72,11 @@ public class FriendDbStorage implements FriendStorage {
                         "WHERE user_id = ?1 " +
                         "AND friend_id = ?2";
                 jdbcTemplate.update(sqlUpdateStatus,friendId, userId, false);
-                log.info("Пользователь с ID=" + friendId + " стал подписчиком пользователя с ID=" + userId + ".");
+                log.info("Пользователь ID={} стал подписчиком пользователя ID={}", friendId, userId);
             }
         } catch (EmptyResultDataAccessException e) {
-            log.info("Пользователь с ID=" + friendId + " отсутствует в списке друзей пользователя с ID=" + userId + "." +
-                    " Удаление невозможно.");
+            log.info("Пользователь ID=" + friendId + " отсутствует в списке друзей пользователя ID=" + userId + "\n" +
+                    "Удаление невозможно");
         }
     }
 

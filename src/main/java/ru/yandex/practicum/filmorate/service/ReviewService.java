@@ -1,147 +1,76 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.ArgumentNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.database.ReviewDbStorage;
-import ru.yandex.practicum.filmorate.storage.database.ReviewLikeDbStorage;
-import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.ReviewStorage;
+import ru.yandex.practicum.filmorate.validators.IdValidator;
 import ru.yandex.practicum.filmorate.validators.ReviewValidator;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
-public class ReviewService {
-    private final ReviewDbStorage reviewDbStorage;
-    private final ReviewLikeDbStorage reviewLikeDbStorage;
+public class ReviewService implements ReviewStorage {
+    private final ReviewDbStorage reviewStorage;
+    private final EventService eventService;
     private final ReviewValidator reviewValidator;
-    private final UserDbStorage userDbStorage;
+    private final IdValidator idValidator;
 
-    //Поместить отзыв в БД
+    // Создать новый отзыв пользователя
+    @Override
     public Review createReview(Review review) {
-        reviewValidator.validate(review); //Проверка переменных экземпляра класса Review
-        Review reviewWithId = reviewDbStorage.createReview(review);
-
-        addEvent(reviewWithId.getUserId(), reviewWithId.getReviewId(), "ADD"); //Добавление события в ленту событий
-        return reviewWithId;
-    }
-
-    //Обновить отзыв в БД
-    public Review updateReview(Review review) {
         reviewValidator.validate(review);
-        checkReviewInDb(review.getReviewId()); //Проверка наличия отзыва в БД по его id
-        reviewDbStorage.updateReview(review);
-
-        Review reviewWithId = getReviewById(review.getReviewId());
-        addEvent(reviewWithId.getUserId(), review.getReviewId(), "UPDATE"); //Добавление события в ленту событий
-        return reviewWithId;
+        Review createdReview = reviewStorage.createReview(review);
+        eventService.addEvent(createdReview.getUserId(), createdReview.getReviewId(), "REVIEW", "ADD");
+        return createdReview;
     }
 
-    //Удалить отзыв из БД по его id
+    // Обновить отзыв пользователя
+    @Override
+    public Review updateReview(Review review) {
+        idValidator.validateReviewId(review.getReviewId());
+        reviewValidator.validate(review);
+        Review updatedReview = reviewStorage.updateReview(review);
+        eventService.addEvent(updatedReview.getUserId(), review.getReviewId(), "REVIEW", "UPDATE");
+        return updatedReview;
+    }
+
+    // Удалить отзыв пользователя по ID
+    @Override
     public void deleteReview(Long reviewId) {
-        checkReviewInDb(reviewId);
-
-        addEvent(getReviewById(reviewId).getUserId(), reviewId, "REMOVE"); //Добавление события в ленту событий
-        reviewDbStorage.deleteReview(reviewId);
+        idValidator.validateReviewId(reviewId);
+        Long userId = getReviewById(reviewId).getUserId();
+        reviewStorage.deleteReview(reviewId);
+        eventService.addEvent(userId, reviewId, "REVIEW", "REMOVE");
     }
 
-    //Получить отзыв из БД по его id
+    // Получить отзыв пользователя по ID
+    @Override
     public Review getReviewById(Long reviewId) {
-        checkReviewInDb(reviewId);
-        Review review = reviewDbStorage.getReviewById(reviewId); //Сначала получаем экземпляр класса
-        review.setUseful(getUsefulFromDb(reviewId)); //Затем обновляем переменную экземпляра через сеттер
-
-        return review;
+        idValidator.validateReviewId(reviewId);
+        return reviewStorage.getReviewById(reviewId);
     }
 
-    //Получить все отзывы ко всем фильмам, если указан count - выборку ограничить соответствующим значением
+    // Получить отзывы ко всем фильмам в количестве count
+    @Override
     public List<Review> getAllReviews(Long count) {
-        return reviewDbStorage.getAllReviews()
+        return reviewStorage.getAllReviews(count)
                 .stream()
-                //Для каждого экземпляра класса Review обновляем поле useful через сеттер
-                //Для модификации объектов использую stream.peek()
-                .peek(review -> review.setUseful(getUsefulFromDb(review.getReviewId())))
                 .sorted(Comparator.comparing(Review::getUseful).reversed()) //Сортируем по убываю по полю useful
-                .limit(count)
                 .collect(Collectors.toList());
     }
 
-    //Получить все отзывы к фильму по его id, выборку ограничиваем по count
+    //Получить все отзывы к фильму по ID в количестве count
+    @Override
     public List<Review> getAllReviewsForFilm(Long filmId, Long count) {
-        return reviewDbStorage.getReviewsForFilm(filmId)
+        idValidator.validateFilmId(filmId);
+        return reviewStorage.getAllReviewsForFilm(filmId, count)
                 .stream()
-                .peek(review -> review.setUseful(getUsefulFromDb(review.getReviewId())))
                 .sorted(Comparator.comparing(Review::getUseful).reversed())
-                .limit(count)
                 .collect(Collectors.toList());
     }
-
-    //Добавить лайк к отзыву
-    public void addLike(Long reviewId, Long userId, Boolean isLike) {
-        checkReviewInDb(reviewId);
-        checkUserInDb(userId);
-        reviewLikeDbStorage.addLike(reviewId, userId, isLike);
-    }
-
-    //Удалить лайк к отзыву
-    public void deleteLike(Long reviewId, Long userId, Boolean isLike) {
-        checkReviewInDb(reviewId);
-        checkUserInDb(userId);
-        reviewLikeDbStorage.deleteLike(reviewId, userId, isLike);
-    }
-
-    //Добавить дизлайк к отзыву
-    public void addDislike(Long reviewId, Long userId, Boolean isLike) {
-        checkReviewInDb(reviewId);
-        checkUserInDb(userId);
-        reviewLikeDbStorage.addDislike(reviewId, userId, isLike);
-    }
-
-    //Удалить дизлайк к отзыву
-    public void deleteDislike(Long reviewId, Long userId, Boolean isLike) {
-        checkReviewInDb(reviewId);
-        reviewLikeDbStorage.deleteDislike(reviewId, userId, isLike);
-    }
-
-    //Проверка id на null, проверка на наличие в БД
-    private void checkReviewInDb(Long reviewId) {
-        Optional<Review> reviewInDb = Optional.ofNullable(reviewDbStorage.getReviewById(reviewId));
-        if (reviewInDb.isEmpty()) {
-            throw new ArgumentNotFoundException("Отзыв с id=" + reviewId + " не найден или id=null.");
-        }
-    }
-
-    //Проверка id на null, проверка на наличие в БД
-    private void checkUserInDb(Long userId) {
-        Optional<User> userInDb = Optional.ofNullable(userDbStorage.getUserById(userId));
-        if (userInDb.isEmpty()) {
-            throw new ArgumentNotFoundException("Юзер с id=" + userInDb + " не найден или id=null.");
-        }
-    }
-
-    /*Получить рейтинг отзыва (суммируем значения по полю useful в таблице review_like_list).
-    Если лайков или дизлайков нет - возвращается null, в таком случае полю useful в экземплярах класса Review
-    присваиваем значение 0.*/
-    private Long getUsefulFromDb(Long reviewId) {
-        Optional<Long> useful = Optional.ofNullable(reviewLikeDbStorage.getUsefulFromDb(reviewId));
-        if (useful.isEmpty()) {
-            return 0L;
-        } else {
-            return reviewLikeDbStorage.getUsefulFromDb(reviewId);
-        }
-    }
-
-    //Добавление отзыва в ленту событий
-    public void addEvent(long userId, long reviewId, String operation) {
-        userDbStorage.getEventDbStorage().addEvent(userId, reviewId, "REVIEW", operation);
-    }
-
 }

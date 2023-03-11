@@ -8,6 +8,6 @@ public interface EventStorage {
 
     void addEvent(Long userId, Long entityId, String eventType, String operation);
 
-    List<Event> getEvents(Long userId);
+    List<Event> getAllEvents(Long userId);
 }
 

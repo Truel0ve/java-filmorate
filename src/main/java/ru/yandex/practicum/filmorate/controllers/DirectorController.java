@@ -1,11 +1,10 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.service.DirectorService;
+import ru.yandex.practicum.filmorate.utility.DefaultLogger;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -13,47 +12,37 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/directors")
-@Slf4j
-@Getter
 public class DirectorController {
-
     private final DirectorService directorService;
+    private final DefaultLogger defaultLogger;
 
     @GetMapping
     public List<Director> getAllDirectors() {
-        logRequestMethod(RequestMethod.GET);
+        defaultLogger.logRequestMethod(RequestMethod.GET, "/directors");
         return directorService.getAllDirectors();
     }
 
     @GetMapping("/{id}")
     public Director getDirectorById(@PathVariable("id") Long directorId) {
-        logRequestMethod(RequestMethod.GET, "/" + directorId);
+        defaultLogger.logRequestMethod(RequestMethod.GET, "/directors/" + directorId);
         return directorService.getDirectorById(directorId);
     }
 
     @PostMapping
     public Director postDirector(@Valid @RequestBody Director director) {
-        logRequestMethod(RequestMethod.POST);
+        defaultLogger.logRequestMethod(RequestMethod.POST, "/directors");
         return directorService.createDirector(director);
     }
 
     @PutMapping
     public Director putDirector(@Valid @RequestBody Director director) {
-        logRequestMethod(RequestMethod.PUT);
+        defaultLogger.logRequestMethod(RequestMethod.PUT, "/directors");
         return directorService.updateDirector(director);
     }
 
     @DeleteMapping("/{id}")
     public void deleteDirector(@PathVariable("id") Long directorId) {
-        logRequestMethod(RequestMethod.DELETE, "/" + directorId);
+        defaultLogger.logRequestMethod(RequestMethod.DELETE, "/directors/" + directorId);
         directorService.deleteDirector(directorId);
-    }
-
-    private void logRequestMethod(RequestMethod requestMethod) {
-        log.debug("Получен запрос " + requestMethod + " по адресу: /directors");
-    }
-
-    private void logRequestMethod(RequestMethod requestMethod, String path) {
-        log.debug("Получен запрос " + requestMethod + " по адресу: /directors" + path);
     }
 }

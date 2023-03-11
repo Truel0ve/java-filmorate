@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmControllerTest {
     private final FilmController filmController;
+    private final UserController userController;
 
     private final Film film = Film.builder()
             .name("Терминатор")
@@ -101,13 +102,13 @@ class FilmControllerTest {
                 .name("Pavel")
                 .birthday(LocalDate.of(1990, 12, 8))
                 .build();
-        Long userId = filmController.getFilmService().getUserService().createUser(user).getId();
+        Long userId = userController.postUser(user).getId();
         Long filmId = filmController.postFilm(film).getId();
         filmController.addLike(filmId, userId);
         assertTrue(filmController.getFilmById(filmId).getLikes().contains(userId), "Лайк пользователя не добавлен.");
         filmController.deleteLike(filmId, userId);
         assertFalse(filmController.getFilmById(filmId).getLikes().contains(userId), "Лайк пользователя не удален.");
-        filmController.getFilmService().getUserService().deleteUser(user.getId());
+        userController.deleteUser(user.getId());
     }
 
     @Test
@@ -118,7 +119,7 @@ class FilmControllerTest {
                 .name("Pavel")
                 .birthday(LocalDate.of(1990, 12, 8))
                 .build();
-        Long userId = filmController.getFilmService().getUserService().createUser(user).getId();
+        Long userId = userController.postUser(user).getId();
         Long filmId = filmController.postFilm(film).getId();
         filmController.addLike(filmId, userId);
         List<Film> films = filmController.getPopularFilms(1L, null, null);

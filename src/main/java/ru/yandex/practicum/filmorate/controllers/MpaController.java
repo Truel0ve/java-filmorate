@@ -1,31 +1,29 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.MpaService;
+import ru.yandex.practicum.filmorate.utility.DefaultLogger;
 
 import java.util.List;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/mpa")
-@Slf4j
-@Getter
 public class MpaController {
-    private final FilmService filmService;
+    private final MpaService mpaService;
+    private final DefaultLogger defaultLogger;
 
     @GetMapping
     public List<Mpa> getAllMpa() {
-        log.debug("Получен запрос GET по адресу: /mpa");
-        return filmService.getAllMpa();
+        defaultLogger.logRequestMethod(RequestMethod.GET, "/mpa");
+        return mpaService.getAllMpa();
     }
 
     @GetMapping("/{id}")
     public Mpa getMpaById(@PathVariable("id") Long mpaId) {
-        log.debug("Получен запрос GET по адресу: /mpa/" + mpaId);
-        return filmService.getMpaById(mpaId);
+        defaultLogger.logRequestMethod(RequestMethod.GET, "/mpa/" + mpaId);
+        return mpaService.getMpaById(mpaId);
     }
 }

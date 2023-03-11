@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.database;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -21,11 +20,8 @@ import java.util.*;
 @Primary
 @RequiredArgsConstructor
 @Slf4j
-@Getter
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final LikeDbStorage likeDbStorage;
-    private final MpaDbStorage mpaDbStorage;
     private final GenreDbStorage genreDbStorage;
     private final DirectorDbStorage directorDbStorage;
 
@@ -49,7 +45,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(filmId);
         setGenres(film);
         setDirectors(film);
-        log.info("Добавлен новый фильм \"" + film.getName() + "\".");
+        log.info("Добавлен новый фильм {}", film.getName());
         return film;
     }
 
@@ -90,7 +86,7 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE film_id = ?";
         jdbcTemplate.update(sqlDeleteDirectors, film.getId());
         setDirectors(film);
-        log.info("Внесены изменения в данные фильма \"" + film.getName() + "\".");
+        log.info("Внесены изменения в данные фильма ID={}", film.getId());
         return film;
     }
 
@@ -110,7 +106,7 @@ public class FilmDbStorage implements FilmStorage {
                 "DELETE FROM like_list " +
                 "WHERE film_id = ?";
         jdbcTemplate.update(sqlDeleteLikes, filmId);
-        log.info("Фильм \"" + filmName + "\" удален из базы.");
+        log.info("Фильм {} удален из базы", filmName);
     }
 
     // Получить данные фильма по ID
@@ -160,6 +156,7 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlSelectAllFilms, new FilmRowMapper());
     }
 
+    // Получить список общих фильмов с другом
     public List<Film> getCommonFilmsByFriends(Long userId, Long friendId) {
         String sqlCommonFilms = "SELECT f.*, m.mpa_name, " +
                 "GROUP_CONCAT (DISTINCT g.genre_id ORDER BY g.genre_id SEPARATOR ',') AS genre_id, " +
@@ -185,6 +182,7 @@ public class FilmDbStorage implements FilmStorage {
                 new FilmRowMapper(), userId, friendId);
     }
 
+    // Получить список рекомендованных фильмов для пользователя
     public List<Film> getRecommendations(Long userId) {
         String sqlCommonFilms = "SELECT f.*, m.mpa_name, " +
                 "GROUP_CONCAT (DISTINCT g.genre_id ORDER BY g.genre_id SEPARATOR ',') AS genre_id, " +

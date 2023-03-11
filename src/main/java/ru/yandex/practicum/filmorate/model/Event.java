@@ -4,23 +4,13 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Builder;
 import lombok.Data;
 
-import java.sql.Timestamp;
-
 @Data
 @Builder
 public class Event {
-
-    long eventId;
-
-    long userId;
-
-    String eventType;
-
-    String operation;
-
-    long entityId;
-
-    long timestamp;
-
-
+    private Long eventId;
+    private Long userId;
+    private Long entityId;
+    private String eventType;
+    private String operation;
+    private Long timestamp;
 }

@@ -1,10 +1,11 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.service.ReviewLikeService;
 import ru.yandex.practicum.filmorate.service.ReviewService;
+import ru.yandex.practicum.filmorate.utility.DefaultLogger;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -12,74 +13,60 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/reviews")
-@Slf4j
 public class ReviewController {
     private final ReviewService reviewService;
+    private final ReviewLikeService reviewLikeService;
+    private final DefaultLogger defaultLogger;
 
     @PostMapping
-    public Review createReview(@Valid @RequestBody Review review) {
-        log.debug("Получен запрос " + RequestMethod.POST + " по адресу: /reviews");
+    public Review postReview(@Valid @RequestBody Review review) {
+        defaultLogger.logRequestMethod(RequestMethod.POST, "/reviews");
         return reviewService.createReview(review);
     }
 
     @PutMapping
-    public Review updateReview(@Valid @RequestBody Review review) {
-        log.debug("Получен запрос " + RequestMethod.PUT + " по адресу: /reviews");
+    public Review putReview(@Valid @RequestBody Review review) {
+        defaultLogger.logRequestMethod(RequestMethod.PUT, "/reviews");
         return reviewService.updateReview(review);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteReview(@PathVariable("id") Long reviewId) {
-        log.debug("Получен запрос " + RequestMethod.DELETE + " по адресу: /reviews/" + reviewId);
+    public void deleteReviewById(@PathVariable("id") Long reviewId) {
+        defaultLogger.logRequestMethod(RequestMethod.DELETE, "/reviews/" + reviewId);
         reviewService.deleteReview(reviewId);
     }
 
     @GetMapping("{id}")
     public Review getReviewById(@PathVariable("id") Long reviewId) {
-        log.debug("Получен запрос " + RequestMethod.GET + " по адресу: /reviews/" + reviewId);
+        defaultLogger.logRequestMethod(RequestMethod.GET, "/reviews/" + reviewId);
         return reviewService.getReviewById(reviewId);
     }
 
     @GetMapping
-    public List<Review> getAllReviews(@RequestParam(required = false, name = "filmId") Long filmId,
+    public List<Review> getAllReviews(@RequestParam(required = false) Long filmId,
                                       @RequestParam(name = "count", defaultValue = "10") Long count) {
-
         if (filmId == null) {
-            log.debug("Получен запрос " + RequestMethod.GET + " по адресу: /reviews");
+            defaultLogger.logRequestMethod(RequestMethod.GET, "/reviews?count=" + count);
             return reviewService.getAllReviews(count);
+        } else {
+            defaultLogger.logRequestMethod(RequestMethod.GET, "/reviews?filmId=" + filmId + "&count=" + count);
+            return reviewService.getAllReviewsForFilm(filmId, count);
         }
-
-        log.debug("Получен запрос " + RequestMethod.GET + " по адресу: /reviews?filmId=" +
-                filmId + "&count={count}" + count);
-        return reviewService.getAllReviewsForFilm(filmId, count);
     }
 
-    @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable("id") Long reviewId, @PathVariable("userId") Long userId) {
-        log.debug("Получен запрос " + RequestMethod.PUT + " по адресу: /" + reviewId +
-                "/like/" + userId);
-        reviewService.addLike(reviewId, userId, true);
+    @PutMapping("/{id}/{likeValue}/{userId}")
+    public void addLikeOrDislike(@PathVariable("id") Long reviewId,
+                                 @PathVariable("likeValue") String likeValue,
+                                 @PathVariable("userId") Long userId) {
+        defaultLogger.logRequestMethod(RequestMethod.PUT, "/reviews/" + reviewId + "/" + likeValue + "/" + userId);
+        reviewLikeService.addLikeOrDislike(reviewId, userId, likeValue);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(@PathVariable("id") Long reviewId, @PathVariable("userId") Long userId) {
-        log.debug("Получен запрос " + RequestMethod.DELETE + " по адресу: /" + reviewId +
-                "/like/" + userId);
-        reviewService.deleteLike(reviewId, userId, true);
+    @DeleteMapping("/{id}/{likeValue}/{userId}")
+    public void deleteLikeOrDislike(@PathVariable("id") Long reviewId,
+                                    @PathVariable("likeValue") String likeValue,
+                                    @PathVariable("userId") Long userId) {
+        defaultLogger.logRequestMethod(RequestMethod.DELETE, "/reviews/" + reviewId + "/" + likeValue + "/" + userId);
+        reviewLikeService.deleteLikeOrDislike(reviewId, userId, likeValue);
     }
-
-    @PutMapping("/{id}/dislike/{userId}")
-    public void addDislike(@PathVariable("id") Long reviewId, @PathVariable("userId") Long userId) {
-        log.debug("Получен запрос " + RequestMethod.PUT + " по адресу: /" + reviewId +
-                "/dislike/" + userId);
-        reviewService.addDislike(reviewId, userId, false);
-    }
-
-    @DeleteMapping("/{id}/dislike/{userId}")
-    public void deleteDislike(@PathVariable("id") Long reviewId, @PathVariable("userId") Long userId) {
-        log.debug("Получен запрос " + RequestMethod.DELETE + " по адресу: /" + reviewId +
-                "/dislike/" + userId);
-        reviewService.deleteDislike(reviewId, userId, false);
-    }
-
 }

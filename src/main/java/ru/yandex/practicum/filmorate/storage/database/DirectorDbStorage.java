@@ -43,9 +43,9 @@ public class DirectorDbStorage implements DirectorStorage {
             }, keyHolder);
             Long directorId = Objects.requireNonNull(keyHolder.getKey()).longValue();
             director.setId(directorId);
-            log.info("Добавлен новый режиссёр с ID=" + directorId + ".");
+            log.info("Добавлен новый режиссёр с ID=" + directorId);
         } catch (DuplicateKeyException e) {
-            throw new ValidationException("Режиссёр с именем " + director.getName() + " уже есть в базе.");
+            throw new ValidationException("Режиссёр с именем " + director.getName() + " уже есть в базе");
         }
         return director;
     }
@@ -58,7 +58,7 @@ public class DirectorDbStorage implements DirectorStorage {
                 "SET director_name = ?2 " +
                 "WHERE director_id = ?1";
         jdbcTemplate.update(sqlUpdateDirector, director.getId(), director.getName());
-        log.info("Внесены изменения в данные режиссёра с ID=" + director.getId() + ".");
+        log.info("Внесены изменения в данные режиссёра ID={}", director.getId());
         return director;
     }
 
@@ -73,7 +73,7 @@ public class DirectorDbStorage implements DirectorStorage {
                 "DELETE FROM director_list " +
                 "WHERE director_id = ?";
         jdbcTemplate.update(sqlDeleteList, directorId);
-        log.info("Режиссёр с ID=" + directorId + " удален из базы.");
+        log.info("Режиссёр ID={} удален из базы", directorId);
     }
 
     // Получить данные режиссёра по ID
