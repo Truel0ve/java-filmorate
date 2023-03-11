@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -32,10 +32,13 @@ class FilmControllerTest {
             .mpa(new Mpa(4L, "R"))
             .build();
 
-    @BeforeEach
-    void beforeEach() {
+    @AfterEach
+    void afterEach() {
         for (Film f : filmController.getAllFilms()) {
             filmController.deleteFilm(f.getId());
+        }
+        for (User u : userController.getAllUsers()) {
+            userController.deleteUser(u.getId());
         }
     }
 
